@@ -22,14 +22,16 @@ ID_ADMIN = '225429268'
 
 DOMEN = 'https://my-webhook-bot.herokuapp.com/'
 
+# DOMEN = 'https://f08e-178-67-245-148.eu.ngrok.io'
+
 bot = TeleBot(TOKEN)
 
 
 """
 setWebhook
-https://api.telegram.org/bot5586724882:AAFh3utxGM8-_PvYpnVP5szWRPj1YMMyz2I/setWebhook?url=https://32db-178-67-245-148.eu.ngrok.io
+https://api.telegram.org/bot5586724882:AAFh3utxGM8-_PvYpnVP5szWRPj1YMMyz2I/setWebhook?url=https://my-webhook-bot.herokuapp.com/
 
 deleteWebhook
-https://api.telegram.org/bot5586724882:AAFh3utxGM8-_PvYpnVP5szWRPj1YMMyz2I/deleteWebhook?url=https://32db-178-67-245-148.eu.ngrok.io
+https://api.telegram.org/bot5586724882:AAFh3utxGM8-_PvYpnVP5szWRPj1YMMyz2I/deleteWebhook?url=https://f08e-178-67-245-148.eu.ngrok.io
 
 """

@@ -13,7 +13,7 @@ import pytz
 import schedule
 import telebot
 from flask import Flask, request
-from flask_sslify import SSLify
+# from flask_sslify import SSLify
 
 from data.config import CHAT_ID, DOMEN, ID_ADMIN, TOKEN, bot
 from data.menu import callback_inline, help, help_location, location
@@ -21,10 +21,10 @@ from data.methods import send_message
 from data.sql import conn, cur
 
 server = Flask(__name__)
-sslif = SSLify(server)
+# sslif = SSLify(server)
 
 PATH_BOT = f'{os.path.dirname(sys.argv[0])}'
-APP_URL = f'{DOMEN/{TOKEN}}'
+APP_URL = f'{DOMEN}/{TOKEN}'
 
 
 class ScheduleMessage():
@@ -72,7 +72,7 @@ def check_note_and_send_message():
             cur_time_tup
         ).strftime('%H:%M')
 
-        bot.send_message(
+        send_message(
             ID_ADMIN,
             f"пропуск врмени с {hour_start} до {hour_end}"
         )
