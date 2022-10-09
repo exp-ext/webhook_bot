@@ -6,7 +6,7 @@ from random import choice
 import requests
 from bs4 import BeautifulSoup
 
-from data.config import ID_CHILDREN, bot
+from settings import ID_CHILDREN, bot
 
 
 def where_to_go(message):

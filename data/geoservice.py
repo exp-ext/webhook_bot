@@ -3,8 +3,8 @@ from typing import Tuple
 
 import requests
 
-from data.config import CHAT_ID, OW_API_ID, YANDEX_GEO_API, bot
-from data.sql import cur
+from settings import CHAT_ID, OW_API_ID, YANDEX_GEO_API, bot
+from data.model import cur
 
 
 def get_address_from_coords(coords: str) -> str:

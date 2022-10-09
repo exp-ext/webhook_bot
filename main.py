@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import os
 import pickle
-import sys
 import time
 from datetime import date as dt
 from datetime import datetime, timedelta
@@ -13,17 +12,18 @@ import pytz
 import schedule
 import telebot
 from flask import Flask, request
-# from flask_sslify import SSLify
 
-from data.config import CHAT_ID, DOMEN, ID_ADMIN, TOKEN, bot
 from data.menu import callback_inline, help, help_location, location
 from data.methods import send_message
-from data.sql import conn, cur
+from data.model import conn, cur
+from settings import CHAT_ID, DOMEN, ID_ADMIN, PATH_BOT, TOKEN, bot
+
+# from flask_sslify import SSLify
+
 
 server = Flask(__name__)
 # sslif = SSLify(server)
 
-PATH_BOT = f'{os.path.dirname(sys.argv[0])}'
 APP_URL = f'{DOMEN}/{TOKEN}'
 
 

@@ -1,3 +1,6 @@
+import os
+import sys
+
 from telebot import TeleBot
 
 # токен телеграмм бота, получить можно
@@ -23,6 +26,8 @@ ID_ADMIN = '225429268'
 DOMEN = 'https://my-webhook-bot.herokuapp.com/webhook'
 
 # DOMEN = 'https://f08e-178-67-245-148.eu.ngrok.io'
+
+PATH_BOT = f'{os.path.dirname(sys.argv[0])}'
 
 bot = TeleBot(TOKEN)
 

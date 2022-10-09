@@ -1,8 +1,6 @@
-import os
 import sqlite3
-import sys
 
-PATH_BOT = f'{os.path.dirname(sys.argv[0])}'
+from settings import PATH_BOT
 
 conn = sqlite3.connect(
     f'{PATH_BOT}/data_for_notebot.db', check_same_thread=False

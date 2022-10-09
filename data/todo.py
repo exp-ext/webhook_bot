@@ -4,8 +4,8 @@ import time
 from datetime import date as dt
 from datetime import datetime, timedelta
 
-from data.config import bot
-from data.sql import conn, cur
+from settings import bot
+from data.model import conn, cur
 
 
 def similarity(s1: str, s2: str) -> float:

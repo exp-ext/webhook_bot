@@ -2,11 +2,11 @@ import time
 
 from telebot import types
 
-from data.config import bot
+from settings import bot
 from data.geoservice import (current_weather, my_current_geoposition,
                              weather_forecast)
 from data.parsing import show_joke, where_to_go
-from data.sql import conn, cur
+from data.model import conn, cur
 from data.todo import (add_notes, del_note, show_all_birthdays, show_all_notes,
                        show_note_on_date)
 

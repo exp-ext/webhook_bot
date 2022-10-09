@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from data.config import TOKEN
+from settings import TOKEN
 
 URL = (
     'https://api.telegram.org/bot'
