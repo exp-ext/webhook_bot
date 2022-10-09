@@ -178,7 +178,10 @@ def check_note_and_send_message():
 @server.route('/')
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url=APP_URL)
+    bot.set_webhook(
+        url=APP_URL,
+        drop_pending_updates=True
+    )
 
 
 @server.route('/' + TOKEN, methods=['POST'])
