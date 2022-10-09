@@ -20,7 +20,7 @@ ID_CHILDREN = ['2018237767']
 # ID admin in Telegram, куда будут приходить уведомлеия о пропуске времени
 ID_ADMIN = '225429268'
 
-DOMEN = 'expext.pythonanywhere.com'
+DOMEN = 'https://my-webhook-bot.herokuapp.com/'
 
 bot = TeleBot(TOKEN)
 

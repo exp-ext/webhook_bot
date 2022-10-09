@@ -16,14 +16,15 @@ from flask import Flask, request
 from flask_sslify import SSLify
 
 from data.config import CHAT_ID, DOMEN, ID_ADMIN, TOKEN, bot
-from data.main import callback_inline, help, help_location, location
+from data.menu import callback_inline, help, help_location, location
 from data.methods import send_message
 from data.sql import conn, cur
 
-app = Flask(__name__)
-sslif = SSLify(app)
+server = Flask(__name__)
+sslif = SSLify(server)
 
 PATH_BOT = f'{os.path.dirname(sys.argv[0])}'
+APP_URL = f'{DOMEN/{TOKEN}}'
 
 
 class ScheduleMessage():
@@ -174,7 +175,13 @@ def check_note_and_send_message():
         conn.commit()
 
 
-@app.route(f'{DOMEN}/{TOKEN}', methods=['POST', 'GET'])
+@server.route('/')
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url=APP_URL)
+
+
+@server.route('/' + TOKEN, methods=['POST'])
 def index():
     if request.method == 'POST':
         message = request.get_data().decode('utf-8')
@@ -209,6 +216,6 @@ schedule.every(1).minutes.do(check_note_and_send_message)
 if __name__ == '__main__':
     ScheduleMessage.start_process()
     try:
-        app.run()
+        server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
     except Exception as exc:
         send_message(ID_ADMIN, f'ошибочка polling - {exc}')
