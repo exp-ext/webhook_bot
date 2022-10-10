@@ -1,6 +1,11 @@
 # VS code
 .vscode
 
+#Database
+*.sqlite3
+db.sqlite3
+
+
 # Environments
 .env
 .venv
@@ -17,6 +22,3 @@ check_time.pickle
 __pycache__
 *.py[cod]
 *$py.class
-
-#Database
-*.sqlite3
