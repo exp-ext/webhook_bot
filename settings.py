@@ -23,7 +23,7 @@ ID_CHILDREN = ['2018237767']
 # ID admin in Telegram, куда будут приходить уведомлеия о пропуске времени
 ID_ADMIN = '225429268'
 
-DOMEN = 'https://my-webhook-bot.herokuapp.com/webhook'
+DOMEN = 'https://my-webhook-bot.herokuapp.com'
 
 # DOMEN = 'https://afca-178-67-245-148.eu.ngrok.io'
 
