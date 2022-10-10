@@ -17,3 +17,6 @@ check_time.pickle
 __pycache__
 *.py[cod]
 *$py.class
+
+#Database
+*.sqlite3
