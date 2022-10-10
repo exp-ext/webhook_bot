@@ -1,16 +1,18 @@
-import sqlite3
+import os
+import psycopg2
 
-from settings import ID_ADMIN, PATH_BOT
+from settings import ID_ADMIN
 
 from data.methods import send_message
 
 
 def create_connection():
     try:
-        DATABASE_URL = f'{PATH_BOT}/db.sqlite3'
-        connection = sqlite3.connect(DATABASE_URL)
+        # DATABASE_URL = f'{PATH_BOT}/db.sqlite3'
+        DATABASE_URL = os.environ['DATABASE_URL']
+        connection = psycopg2.connect(DATABASE_URL)
         return connection
-    except sqlite3.DatabaseError as exc:
+    except psycopg2.DatabaseError as exc:
         send_message(ID_ADMIN, f'ошибочка SQL - {exc}')
 
 
