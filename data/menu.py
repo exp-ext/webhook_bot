@@ -6,7 +6,7 @@ from settings import bot
 from data.geoservice import (current_weather, my_current_geoposition,
                              weather_forecast)
 from data.parsing import show_joke, where_to_go
-from data.model import conn, cur
+from data.model import make_request
 from data.todo import (add_notes, del_note, show_all_birthdays, show_all_notes,
                        show_note_on_date)
 
@@ -15,11 +15,12 @@ def replace_messege_id(user_id: int, messege_id: int, chat_id: int) -> None:
     """Заменяем последний ID сообщения user в БД."""
     iddate = round(time.time() * 100000)
     new_request = (iddate, user_id, chat_id, messege_id)
-    cur.execute(
-        "REPLACE INTO requests VALUES(?, ?, ?, ?);",
+
+    make_request(
+        'execute',
+        """REPLACE INTO requests VALUES(?, ?, ?, ?);""",
         new_request
     )
-    conn.commit()
 
 
 def help(message):
@@ -83,11 +84,11 @@ def help(message):
         message.from_user.last_name
     )
 
-    cur.execute(
+    make_request(
+        'execute',
         """REPLACE INTO users VALUES(?, ?, ?);""",
         add_new_user
     )
-    conn.commit()
 
 
 def location(message):
@@ -124,11 +125,12 @@ def location(message):
 
     iddate = round(time.time() * 100000)
     geo = (iddate, message.from_user.id, lon, lat)
-    cur.execute(
+
+    make_request(
+        'execute',
         """INSERT INTO geolocation VALUES(?, ?, ?, ?);""",
         geo
     )
-    conn.commit()
 
     message_id = message.message_id
     bot.delete_message(message.chat.id, message_id)
@@ -138,14 +140,16 @@ def callback_inline(call):
     """Распределяем функции согласно нажатой кнопки."""
     message = call.message
 
-    cur.execute(
+    menu_id = make_request(
+        'execute',
         """ SELECT MAX(dateid), chatid, messegeid
             FROM requests
             WHERE userid=? and chatid=?
         ;""",
-        (call.from_user.id,  message.chat.id)
+        (call.from_user.id,  message.chat.id),
+        fetch='all'
     )
-    menu_id = cur.fetchall()
+
     bot.delete_message(menu_id[0][1], menu_id[0][2])
 
     if call.data == 'birthdays':

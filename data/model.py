@@ -1,14 +1,46 @@
 import sqlite3
+from data.methods import send_message
 
-from settings import PATH_BOT
+from settings import ID_ADMIN, PATH_BOT
 
-conn = sqlite3.connect(
-    f'{PATH_BOT}/data_for_notebot.db', check_same_thread=False
-)
 
-cur = conn.cursor()
+def create_connection():
+    try:
+        connection = sqlite3.connect(f'{PATH_BOT}/db.sqlite3')
+    except sqlite3.DatabaseError as exc:
+        send_message(ID_ADMIN, f'ошибочка SQL - {exc}')
+    return connection
 
-cur.executescript(
+
+def make_request(request, text, variables=None, fetch=None):
+    """ Функция делает запрос к БД с параметрами:
+        1 request - метод запроса,
+        2 text - тест запрос,
+        3 variables - переменные в запросе,
+        4 fetch - извлечение из БД (all, one)."""
+    conn = create_connection()
+    cur = conn.cursor()
+    result = '!', 200
+    if request == 'executescript':
+        cur.executescript(text)
+    elif request == 'execute':
+        if variables is None:
+            qwerty = cur.execute(text)
+        else:
+            qwerty = cur.execute(text, variables)
+
+        if fetch == 'all':
+            result = qwerty.fetchall()
+        elif fetch == 'one':
+            result = qwerty.fetchone()
+
+    conn.commit()
+    conn.close()
+    return result
+
+
+make_request(
+    'executescript',
     """CREATE TABLE IF NOT EXISTS users(
         userid INT PRIMARY KEY,
         fname TEXT,
@@ -41,4 +73,3 @@ cur.executescript(
     );
     """
 )
-conn.commit()

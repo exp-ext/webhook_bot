@@ -25,18 +25,8 @@ ID_ADMIN = '225429268'
 
 DOMEN = 'https://my-webhook-bot.herokuapp.com/webhook'
 
-# DOMEN = 'https://f08e-178-67-245-148.eu.ngrok.io'
+# DOMEN = 'https://afca-178-67-245-148.eu.ngrok.io'
 
 PATH_BOT = f'{os.path.dirname(sys.argv[0])}'
 
 bot = TeleBot(TOKEN)
-
-
-"""
-setWebhook
-https://api.telegram.org/bot5586724882:AAFh3utxGM8-_PvYpnVP5szWRPj1YMMyz2I/setWebhook?url=https://my-webhook-bot.herokuapp.com/
-
-deleteWebhook
-https://api.telegram.org/bot5586724882:AAFh3utxGM8-_PvYpnVP5szWRPj1YMMyz2I/deleteWebhook?url=https://f08e-178-67-245-148.eu.ngrok.io
-
-"""

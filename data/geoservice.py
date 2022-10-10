@@ -4,7 +4,7 @@ from typing import Tuple
 import requests
 
 from settings import CHAT_ID, OW_API_ID, YANDEX_GEO_API, bot
-from data.model import cur
+from data.model import make_request
 
 
 def get_address_from_coords(coords: str) -> str:
@@ -54,14 +54,15 @@ def status_weather(description_weather: str) -> str:
 
 def get_geo_coordinates(user_id: int) -> Tuple[int, str, str]:
     """Считывание последних геокоординат User из БД."""
-    cur.execute(
+    return make_request(
+        'execute',
         """ SELECT MAX(iddate), longitude, latitude
             FROM geolocation
             WHERE userid=?
             ;""",
-        (user_id,)
+        (user_id,),
+        fetch='one'
     )
-    return cur.fetchone()
 
 
 def my_current_geoposition(message):

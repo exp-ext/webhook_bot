@@ -15,11 +15,10 @@ from flask import Flask, request
 
 from data.menu import callback_inline, help, help_location, location
 from data.methods import send_message
-from data.model import conn, cur
+from data.model import make_request
 from settings import CHAT_ID, DOMEN, ID_ADMIN, PATH_BOT, TOKEN, bot
 
 # from flask_sslify import SSLify
-
 
 server = Flask(__name__)
 # sslif = SSLify(server)
@@ -87,13 +86,16 @@ def check_note_and_send_message():
         date_today + timedelta(days=7),
         '%d.%m'
     )
-    cur.execute(
+
+    tasks = make_request(
+        'execute',
         """ SELECT date, time, type, task, id
             FROM tasks
             WHERE date=? OR date=? OR date=?
-            ;""", (date_today_str, date_birthday, date_delta_birth)
+            ;""",
+        (date_today_str, date_birthday, date_delta_birth),
+        fetch='all'
     )
-    tasks = cur.fetchall()
 
     del_id = []
     time_zone = pytz.timezone('Europe/Moscow')
@@ -168,11 +170,12 @@ def check_note_and_send_message():
 
     if len(del_id) > 0:
         tuple_del_id = tuple(del_id) if len(del_id) > 1 else f'({del_id[0]})'
-        cur.execute(
+
+        make_request(
+            'execute',
             """DELETE FROM tasks WHERE id IN %(list)s ;""" %
             {"list": tuple_del_id}
         )
-        conn.commit()
 
 
 @server.route('/')
@@ -221,4 +224,4 @@ if __name__ == '__main__':
     try:
         server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
     except Exception as exc:
-        send_message(ID_ADMIN, f'ошибочка polling - {exc}')
+        send_message(ID_ADMIN, f'ошибочка webhook - {exc}')
