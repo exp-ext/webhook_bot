@@ -73,7 +73,7 @@ make_request(
         id serial PRIMARY KEY,
         date bigint NOT NULL,
         user_id integer UNIQUE NOT NULL,
-        chat_id integer NOT NULL,
+        chat_id text NOT NULL,
         messege_id integer NOT NULL
     );"""
 )

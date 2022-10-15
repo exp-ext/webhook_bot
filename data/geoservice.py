@@ -58,11 +58,12 @@ def get_geo_coordinates(user_id: int) -> Tuple[int, str, str]:
         """ SELECT longitude, latitude, date_id
             FROM geolocation
             WHERE user_id=%s
-            ORDER BY user_id DESC;
+            ORDER BY user_id DESC
+            LIMIT 1;
         """,
         (user_id,),
         fetch='all'
-    )
+    )[0]
 
 
 def my_current_geoposition(message):

@@ -174,7 +174,7 @@ def handler_location(message):
     location(message)
 
 
-@bot.message_handler(commands=['help_locatoin'])
+@bot.message_handler(commands=['help_location'])
 def handler_help_location(message):
     help_location(message)
 
