@@ -2,7 +2,8 @@ import requests
 from dotenv import load_dotenv
 from settings import ID_ADMIN, PRACTICUM_TOKEN, bot, logger
 
-from exceptions import BedRequestError, IncorrectDataError, StatusHomeworkError
+from data.exceptions import (BedRequestError, IncorrectDataError,
+                             StatusHomeworkError)
 
 load_dotenv()
 
