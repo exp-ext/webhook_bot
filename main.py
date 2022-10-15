@@ -87,8 +87,7 @@ def check_note_and_send_message():
     )
     send_flag = False
     text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
-    bot.send_message(ID_ADMIN, f"Отправил бот {time_for_warning}")
-    send_error_message(ID_ADMIN, f"Отправил error_mess {time_for_warning}")
+
     if time_for_warning != '07:15':
         for item in tasks:
             if date_today_str and time_for_warning in item:
