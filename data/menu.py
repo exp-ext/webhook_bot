@@ -45,9 +45,9 @@ def replace_messege_id(user_id: int, messege_id: int, chat_id: int) -> None:
     check_record = make_request(
             """SELECT user_id
                FROM requests
-               WHERE user_id=%s;
+               WHERE user_id=%s AND chat_id=%s;
             """,
-            (user_id,),
+            (user_id, chat_id),
             fetch='one'
     )
     if check_record:

@@ -55,19 +55,19 @@ def status_weather(description_weather: str) -> str:
 def get_geo_coordinates(user_id: int) -> Tuple[int, str, str]:
     """Считывание последних геокоординат User из БД."""
     return make_request(
-        """ SELECT MAX(iddate), longitude, latitude
+        """ SELECT longitude, latitude, MAX(date_id)
             FROM geolocation
-            WHERE userid=%s;
+            WHERE user_id=%s;
         """,
         (user_id,),
-        fetch='one'
+        fetch='all'
     )
 
 
 def my_current_geoposition(message):
     """Вывод адреса местонахождения в группу."""
     coordinates = get_geo_coordinates(message.from_user.id)
-    geo = f"{coordinates[1]},{coordinates[2]}"
+    geo = f"{coordinates[0]},{coordinates[1]}"
 
     send_text = (
         "Согласно полученных геокоординат, "
@@ -87,8 +87,8 @@ def current_weather(message):
         res = requests.get(
             "http://api.openweathermap.org/data/2.5/weather",
             params={
-                'lat': coordinates[2],
-                'lon': coordinates[1],
+                'lat': coordinates[1],
+                'lon': coordinates[0],
                 'units': 'metric',
                 'lang': 'ru',
                 'APPID': OW_API_ID
@@ -139,8 +139,8 @@ def weather_forecast(message):
         res = requests.get(
             "http://api.openweathermap.org/data/2.5/forecast?",
             params={
-                'lat': coordinates[2],
-                'lon': coordinates[1],
+                'lat': coordinates[1],
+                'lon': coordinates[0],
                 'units': 'metric',
                 'lang': 'ru',
                 'APPID': OW_API_ID
