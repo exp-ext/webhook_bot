@@ -185,7 +185,7 @@ def handler_callback(call):
     callback_inline(call)
 
 
-@server.route('/test', methods=['POST'])
+@server.route('/test', methods=['GET', 'POST'])
 def test():
     return 'alive'
 
