@@ -55,10 +55,10 @@ def status_weather(description_weather: str) -> str:
 def get_geo_coordinates(user_id: int) -> Tuple[int, str, str]:
     """Считывание последних геокоординат User из БД."""
     return make_request(
-        """ SELECT longitude, latitude, MAX(date_id)
+        """ SELECT longitude, latitude, date_id
             FROM geolocation
             WHERE user_id=%s
-            GROUP BY date_id;
+            ORDER BY user_id DESC;
         """,
         (user_id,),
         fetch='all'
