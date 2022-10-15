@@ -39,7 +39,7 @@ def check_user(message):
         logger.info(f'Создан новый юзер {user_first} {user_last}')
 
 
-def replace_messege_id(user_id: int, messege_id: int, chat_id: int) -> None:
+def replace_messege_id(user_id: int, messege_id: int, chat_id: str) -> None:
     """Заменяем последний ID сообщения user в БД."""
     date = round(time.time() * 100000)
     check_record = make_request(
@@ -121,7 +121,7 @@ def help(message):
         parse_mode='Markdown'
     ).message_id
 
-    replace_messege_id(message.from_user.id, menu_id, message.chat.id)
+    replace_messege_id(message.from_user.id, menu_id, str(message.chat.id))
 
     message_id = message.message_id
     bot.delete_message(message.chat.id, message_id)
@@ -159,7 +159,7 @@ def location(message):
     lat = message.location.latitude
     lon = message.location.longitude
 
-    replace_messege_id(message.from_user.id, menu_id, chat_id)
+    replace_messege_id(message.from_user.id, menu_id, str(chat_id))
 
     date_id = round(time.time() * 100000)
 
@@ -207,7 +207,9 @@ def callback_inline(call):
             req_text,
             parse_mode='Markdown'
         )
-        replace_messege_id(call.from_user.id, msg.message_id, message.chat.id)
+        replace_messege_id(
+            call.from_user.id, msg.message_id, str(message.chat.id)
+        )
 
         bot.register_next_step_handler(msg, add_notes)
     elif call.data == 'del':
@@ -220,7 +222,9 @@ def callback_inline(call):
             req_text,
             parse_mode='Markdown'
         )
-        replace_messege_id(call.from_user.id, msg.message_id, message.chat.id)
+        replace_messege_id(
+            call.from_user.id, msg.message_id, str(message.chat.id)
+        )
 
         bot.register_next_step_handler(msg, del_note)
     elif call.data == 'show':
@@ -233,7 +237,9 @@ def callback_inline(call):
             req_text,
             parse_mode='Markdown'
             )
-        replace_messege_id(call.from_user.id, msg.message_id, message.chat.id)
+        replace_messege_id(
+            call.from_user.id, msg.message_id, str(message.chat.id)
+        )
         bot.register_next_step_handler(msg, show_note_on_date)
     elif call.data == 'where_to_go':
         where_to_go(message)

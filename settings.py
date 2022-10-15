@@ -36,7 +36,7 @@ bot = TeleBot(TOKEN)
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-    filename='main.log',
+    filename='logs.log',
     level=logging.DEBUG
 )
 logger = logging.getLogger(__name__)
