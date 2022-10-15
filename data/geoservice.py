@@ -57,7 +57,8 @@ def get_geo_coordinates(user_id: int) -> Tuple[int, str, str]:
     return make_request(
         """ SELECT longitude, latitude, MAX(date_id)
             FROM geolocation
-            WHERE user_id=%s;
+            WHERE user_id=%s
+            GROUP BY date_id;
         """,
         (user_id,),
         fetch='all'
