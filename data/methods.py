@@ -32,7 +32,6 @@ def read_file() -> float:
             return pickle.load(fb)
     except Exception as error:
         logger.error(error, exc_info=True)
-        send_error_message(ID_ADMIN, error)
         return 0
 
 
@@ -43,4 +42,3 @@ def write_file(check_time: float) -> None:
             pickle.dump(check_time, fb)
     except Exception as error:
         logger.error(error, exc_info=True)
-        send_error_message(ID_ADMIN, error)
