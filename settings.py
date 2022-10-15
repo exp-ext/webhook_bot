@@ -30,6 +30,8 @@ DOMEN = os.getenv('DOMEN')
 # подключение к postgres
 DATABASE_URL = os.getenv('DATABASE_URL')
 
+PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
+
 bot = TeleBot(TOKEN)
 
 logging.basicConfig(

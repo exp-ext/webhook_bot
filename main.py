@@ -16,7 +16,7 @@ from data.menu import callback_inline, help, help_location, location
 from data.methods import read_file, send_error_message, write_file
 from data.model import make_request
 from settings import CHAT_ID, DOMEN, ID_ADMIN, TOKEN, bot, logger
-
+from data.homework import main_yandex_practicum
 # from flask_sslify import SSLify
 
 server = Flask(__name__)
@@ -87,6 +87,9 @@ def check_note_and_send_message():
     )
     send_flag = False
     text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
+
+    if int(time_for_warning.split(':')[1]) % 10 == 0:
+        main_yandex_practicum()
 
     if time_for_warning != '07:15':
         for item in tasks:
