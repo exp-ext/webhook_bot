@@ -185,6 +185,11 @@ def handler_callback(call):
     callback_inline(call)
 
 
+@server.route('/', methods=['POST'])
+def test():
+    return 'alive'
+
+
 @server.route('/' + TOKEN, methods=['POST'])
 def index():
     if request.method == 'POST':
