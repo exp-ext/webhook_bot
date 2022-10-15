@@ -55,11 +55,10 @@ def status_weather(description_weather: str) -> str:
 def get_geo_coordinates(user_id: int) -> Tuple[int, str, str]:
     """Считывание последних геокоординат User из БД."""
     return make_request(
-        'execute',
         """ SELECT MAX(iddate), longitude, latitude
             FROM geolocation
-            WHERE userid=?
-            ;""",
+            WHERE userid=%s;
+        """,
         (user_id,),
         fetch='one'
     )
@@ -218,4 +217,3 @@ def weather_forecast(message):
 
     except Exception as exc:
         bot.send_message(message.chat.id, f'ошибочка вышла - {exc}')
-        pass

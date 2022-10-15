@@ -10,3 +10,4 @@ Flask-SSLify==0.1.5
 sqlalchemy==1.4.41
 psycopg2-binary==2.9.4
 databases[postgresql]
+python-dotenv

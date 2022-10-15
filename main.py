@@ -1,7 +1,6 @@
 #!/opt/bin python3
 # -*- coding: utf-8 -*-
 import os
-import pickle
 import time
 from datetime import date as dt
 from datetime import datetime, timedelta
@@ -14,9 +13,9 @@ import telebot
 from flask import Flask, request
 
 from data.menu import callback_inline, help, help_location, location
-from data.methods import send_message
+from data.methods import read_file, send_error_message, write_file
 from data.model import make_request
-from settings import CHAT_ID, DOMEN, ID_ADMIN, PATH_BOT, TOKEN, bot
+from settings import CHAT_ID, DOMEN, ID_ADMIN, TOKEN, bot, logger
 
 # from flask_sslify import SSLify
 
@@ -37,23 +36,8 @@ class ScheduleMessage():
         p1.start()
 
 
-def read_file() -> float:
-    """Считываем время из файла для проверки."""
-    try:
-        with open(f'{PATH_BOT}/check_time.pickle', 'rb') as fb:
-            return pickle.load(fb)
-    except OSError:
-        return 0
-
-
-def write_file(check_time: float) -> None:
-    """Записываем текущее время в файл для проверки на следующем цикле."""
-    with open(f'{PATH_BOT}/check_time.pickle', 'wb') as fb:
-        pickle.dump(check_time, fb)
-
-
 def check_note_and_send_message():
-    """Основной модуль оповещающий о собыниях в чатах."""
+    """Основной модуль оповещающий о событиях в чатах."""
     # проверка на пропуск минут в случаях отказов оборудования
     cur_time_tup = time.mktime(
         datetime.now().replace(second=0, microsecond=0).timetuple()
@@ -71,7 +55,7 @@ def check_note_and_send_message():
             cur_time_tup
         ).strftime('%H:%M')
 
-        send_message(
+        send_error_message(
             ID_ADMIN,
             f"пропуск врмени с {hour_start} до {hour_end}"
         )
@@ -88,10 +72,9 @@ def check_note_and_send_message():
     )
 
     tasks = make_request(
-        'execute',
         """ SELECT date, time, type, task, id
             FROM tasks
-            WHERE date=? OR date=? OR date=?
+            WHERE date=%s OR date=%s OR date=%s
             ;""",
         (date_today_str, date_birthday, date_delta_birth),
         fetch='all'
@@ -105,7 +88,7 @@ def check_note_and_send_message():
         '%H:%M'
     )
     send_flag = False
-    text_note = '*Напоминаю, что через 4 часа запланировано:*\n'
+    text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
 
     if time_for_warning != '07:15':
         for item in tasks:
@@ -114,7 +97,7 @@ def check_note_and_send_message():
                 send_flag = True
                 del_id.append(item[4])
         if send_flag:
-            send_message(CHAT_ID, text_note, parse_mode='Markdown')
+            bot.send_message(CHAT_ID, text_note, parse_mode='Markdown')
 
     cur_time_msk = datetime.strftime(datetime.now(time_zone), '%H:%M')
 
@@ -142,19 +125,19 @@ def check_note_and_send_message():
                     text_birthday_ahead += f'- {item[3]}\n'
 
         if send_flag_note:
-            send_message(
+            bot.send_message(
                 CHAT_ID,
                 text_note,
                 parse_mode='Markdown'
             )
         if send_flag_birth:
-            send_message(
+            bot.send_message(
                 CHAT_ID,
                 text_birthday,
                 parse_mode='Markdown'
             )
         if send_flag_birth_ahead:
-            send_message(
+            bot.send_message(
                 CHAT_ID,
                 text_birthday_ahead,
                 parse_mode='Markdown'
@@ -163,37 +146,22 @@ def check_note_and_send_message():
         ru_holidays = holidays.RU()
         if date_today in ru_holidays:
             hd = ru_holidays.get(date_today)
-            send_message(
+            bot.send_message(
                 CHAT_ID,
                 f'Господа, поздравляю вас с праздником - {hd}'
             )
 
     if len(del_id) > 0:
-        tuple_del_id = tuple(del_id) if len(del_id) > 1 else f'({del_id[0]})'
-
-        make_request(
-            'execute',
-            """DELETE FROM tasks WHERE id IN %(list)s ;""" %
-            {"list": tuple_del_id}
-        )
-
-
-@server.route('/')
-def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(
-        url=APP_URL,
-        drop_pending_updates=True
-    )
-
-
-@server.route('/' + TOKEN, methods=['POST'])
-def index():
-    if request.method == 'POST':
-        message = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(message)
-        bot.process_new_updates([update])
-        return '!', 200
+        if len(del_id) == 1:
+            make_request(
+                    """DELETE FROM tasks WHERE id=%s;""",
+                    (del_id[0],)
+                )
+        else:
+            make_request(
+                """DELETE FROM tasks WHERE id IN %(list)s ;""",
+                {"list": tuple(del_id)}
+            )
 
 
 @bot.message_handler(commands=['help'])
@@ -216,12 +184,30 @@ def handler_callback(call):
     callback_inline(call)
 
 
-schedule.every(1).minutes.do(check_note_and_send_message)
+@server.route('/' + TOKEN, methods=['POST'])
+def index():
+    if request.method == 'POST':
+        message = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(message)
+        bot.process_new_updates([update])
+        return '!', 200
+
+
+def main():
+    schedule.every(1).minutes.do(check_note_and_send_message)
+    ScheduleMessage.start_process()
+
+    try:
+        bot.remove_webhook()
+        bot.set_webhook(
+            url=APP_URL,
+            drop_pending_updates=True
+        )
+        server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    except Exception as exc:
+        send_error_message(ID_ADMIN, f'ошибка webhook - {exc}')
+        logger.exception(f'ошибка webhook - {exc}')
 
 
 if __name__ == '__main__':
-    ScheduleMessage.start_process()
-    try:
-        server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-    except Exception as exc:
-        send_message(ID_ADMIN, f'ошибочка webhook - {exc}')
+    main()

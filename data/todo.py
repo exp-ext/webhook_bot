@@ -1,6 +1,5 @@
 import difflib
 import re
-import time
 from datetime import date as dt
 from datetime import datetime, timedelta
 
@@ -35,10 +34,9 @@ class Messege:
     def add_todo(self, user_id: int) -> bool:
         """Добавляем задачу в БД."""
         tasks = make_request(
-            'execute',
             """ SELECT id, date, time, task
                 FROM tasks
-                WHERE date=?;
+                WHERE date=%s;
             """,
             (self.date,),
             fetch='all'
@@ -48,14 +46,15 @@ class Messege:
                 simil = similarity(item[3], self.message)
                 if simil > 0.618:
                     return False
-        id = round(time.time() * 100000)
 
-        new_tasks = (id, self.date, self.time,
-                     self.type_note, self.message, user_id)
+        new_tasks = (
+            self.date, self.time, self.type_note, self.message, user_id
+        )
 
         make_request(
-            'execute',
-            """INSERT INTO tasks VALUES(?, ?, ?, ?, ?, ?);""",
+            """INSERT INTO tasks (date, time, type, task, user_id)
+               VALUES(%s, %s, %s, %s, %s);
+            """,
             new_tasks
         )
         return True
@@ -154,7 +153,6 @@ def add_notes(message):
                 text_send,
                 parse_mode='Markdown'
             )
-
         elif pars_mess.add_todo(user_id) is False:
             text_send = (
                 'Есть более чем на 61% схожая запись на дату'
@@ -185,15 +183,14 @@ def add_notes(message):
                     text_send, parse_mode='Markdown'
                 )
         question_id = make_request(
-            'execute',
-            """ SELECT MAX(dateid), chatid, messegeid
+            """ SELECT chat_id, messege_id
                 FROM requests
-                WHERE userid=? and chatid=?;
+                WHERE user_id=%s AND chat_id=%s;
             """,
             (user_id, message.chat.id),
-            fetch='all'
+            fetch='one'
         )
-        bot.delete_message(question_id[0][1], question_id[0][2])
+        bot.delete_message(question_id[0], question_id[1])
 
         message_id = message.message_id
         bot.delete_message(message.chat.id, message_id)
@@ -221,12 +218,11 @@ def del_note(message):
             )
         else:
             tasks = make_request(
-                'execute',
                 """ SELECT id, task
                     FROM tasks
-                    WHERE date=? AND task LIKE ('%' || ? || '%');
+                    WHERE date=%s AND task LIKE %s;
                 """,
-                (date, task),
+                (date, '%' + task + '%'),
                 fetch='one'
             )
             if tasks is None:
@@ -240,8 +236,7 @@ def del_note(message):
                 )
             else:
                 make_request(
-                    'execute',
-                    """DELETE FROM tasks WHERE id=?;""",
+                    """DELETE FROM tasks WHERE id=%s;""",
                     (tasks[0],)
                 )
                 send_text = (
@@ -255,35 +250,33 @@ def del_note(message):
                 )
 
         question_id = make_request(
-            'execute',
-            """ SELECT MAX(dateid), chatid ,messegeid
+            """ SELECT chat_id, messege_id
                 FROM requests
-                WHERE userid=? and chatid=?;
+                WHERE user_id=%s AND chat_id=%s;
             """,
             (message.from_user.id, message.chat.id),
             fetch='one'
         )
-        bot.delete_message(question_id[1], question_id[2])
+        bot.delete_message(question_id[0], question_id[1])
 
         message_id = message.message_id
         bot.delete_message(message.chat.id, int(message_id))
 
     except Exception as exc:
-        bot.send_message(message.chat.id, f'ошибочка вышла - {exc}')
+        bot.send_message(message.chat.id, f'ошибка - {exc}')
         pass
 
 
 def show_note_on_date(message):
     """Вывод записей из БД на конкретую дату."""
-    command_text = re.sub(r'/show ', '', message.text)
-    pars_mess = Messege(command_text)
-    date = pars_mess.date
+    data = getter_data_for_parsing_messege(message.text)
+    date = data[0]
     date_every_year = '.'.join([date.split('.')[0], date.split('.')[1]])
 
     if date is None:
         send_text = (
             f'*{message.from_user.first_name}*, '
-            'дата в запросе не найдена! Начните операцию сначала.'
+            'не удалось разобрать что это за дата 🧐. Попробуйте снова 🙄'
         )
         bot.send_message(
             message.chat.id,
@@ -292,31 +285,30 @@ def show_note_on_date(message):
         )
     else:
         tasks = make_request(
-            'execute',
             """ SELECT date, type, task
                 FROM tasks
-                WHERE date=? or date=?;
+                WHERE date=%s or date=%s;
             """,
             (date_every_year, date),
             fetch='all'
         )
         text_notes = (
             f'*{message.from_user.first_name}, '
-            'на {date} запланировано:*\n'
+            f'на {date} запланировано 📜:*\n'
         )
         send_note = False
         text_birthday = (
             f'*{message.from_user.first_name}, '
-            'на выбранную дату {date} найдено ежегодное напоминание:*\n'
+            f'на выбранную дату {date} найдено ежегодное напоминание 🎉:*\n'
         )
         send_birthday = False
 
         for item in tasks:
             if item[1] == 'todo':
-                text_notes += f'- {item[2]}'
+                text_notes += f'- {item[2]}\n'
                 send_note = True
             if item[1] == 'birthday':
-                text_birthday += f'- {item[2]}'
+                text_birthday += f'- {item[2]}\n'
                 send_birthday = True
 
         if send_note:
@@ -338,15 +330,14 @@ def show_note_on_date(message):
                 parse_mode='Markdown'
             )
     question_id = make_request(
-            'execute',
-            """ SELECT MAX(dateid), chatid, messegeid
+            """ SELECT chat_id, messege_id
                 FROM requests
-                WHERE userid=? and chatid=?;
+                WHERE user_id=%s AND chat_id=%s;
             """,
             (message.from_user.id, message.chat.id),
             fetch='one'
         )
-    bot.delete_message(question_id[1], question_id[2])
+    bot.delete_message(question_id[0], question_id[1])
 
     message_id = message.message_id
     bot.delete_message(message.chat.id, int(message_id))
@@ -363,7 +354,6 @@ def show_all_notes(message):
     """Вывод всех записей из БД."""
     note = []
     tasks = make_request(
-        'execute',
         """ SELECT date, task
             FROM tasks
             WHERE type='todo' AND task NOT LIKE ('%' || 'с апогеем' || '%');
@@ -374,10 +364,16 @@ def show_all_notes(message):
         note.append(f'{item[0]} - {item[1]}')
 
     note.sort(key=sort_date)
-    note_sort = (
-        f'*{message.from_user.first_name}, '
-        'согласно запроса, в базе найдено:*\n'
-    )
+    if tasks:
+        note_sort = (
+            f'*{message.from_user.first_name}, '
+            'в наших планах есть записи 📜:*\n'
+        )
+    else:
+        note_sort = (
+            f'*{message.from_user.first_name}, '
+            'у нас нет никаких планов 👌*\n'
+        )
     for n in note:
         note_sort = note_sort + f'{n}\n'
 
@@ -388,7 +384,6 @@ def show_all_birthdays(message):
     """Показать все дни рождения."""
     note = []
     tasks = make_request(
-        'execute',
         """ SELECT date, task
             FROM tasks
             WHERE type='birthday';
@@ -399,10 +394,16 @@ def show_all_birthdays(message):
         note.append(f'{item[0]} - {item[1]}')
 
     note.sort(key=lambda x: int(f'{x[:5].split(".")[1]}{x[:5].split(".")[0]}'))
-    note_sort = (
-        f'*{message.from_user.first_name}, '
-        'согласно Вашего запроса, найдены ежегодные напоминания:*\n'
-    )
+    if tasks:
+        note_sort = (
+            f'*{message.from_user.first_name}, '
+            'найдены ежегодные напоминания 🎉:*\n'
+        )
+    else:
+        note_sort = (
+            f'*{message.from_user.first_name}, '
+            'похоже что у вас нет ежегодных напоминания 🫤:*\n'
+        )
     for n in note:
         note_sort = note_sort + f'{n}\n'
 

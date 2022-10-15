@@ -1,30 +1,78 @@
 import time
 
+from settings import bot, logger
 from telebot import types
 
-from settings import bot
 from data.geoservice import (current_weather, my_current_geoposition,
                              weather_forecast)
-from data.parsing import show_joke, where_to_go
 from data.model import make_request
+from data.parsing import show_joke, where_to_go
 from data.todo import (add_notes, del_note, show_all_birthdays, show_all_notes,
                        show_note_on_date)
 
 
+def check_user(message):
+    user_id = message.from_user.id
+    user_first = message.from_user.first_name
+    user_last = message.from_user.last_name
+
+    user = make_request(
+            """SELECT user_id FROM users WHERE user_id=%s;""",
+            (user_id,),
+            fetch='one'
+    )
+    if user:
+        make_request(
+            """UPDATE users
+               SET user_id=%s, user_first=%s, user_last=%s
+               WHERE  user_id=%s;
+            """,
+            (user_id, user_first, user_last, user_id)
+        )
+    else:
+        make_request(
+            """INSERT INTO users (user_id, user_first, user_last)
+               VALUES(%s, %s, %s);
+            """,
+            (user_id, user_first, user_last)
+        )
+        logger.info(f'Создан новый юзер {user_first} {user_last}')
+
+
 def replace_messege_id(user_id: int, messege_id: int, chat_id: int) -> None:
     """Заменяем последний ID сообщения user в БД."""
-    iddate = round(time.time() * 100000)
-    new_request = (iddate, user_id, chat_id, messege_id)
-
-    make_request(
-        'execute',
-        """REPLACE INTO requests VALUES(?, ?, ?, ?);""",
-        new_request
+    date = round(time.time() * 100000)
+    check_record = make_request(
+            """SELECT user_id
+               FROM requests
+               WHERE user_id=%s;
+            """,
+            (user_id,),
+            fetch='one'
     )
+    if check_record:
+        new_request = (date, user_id, chat_id, messege_id, user_id)
+        make_request(
+            """ UPDATE requests
+                SET date=%s, user_id=%s, chat_id=%s, messege_id=%s
+                WHERE user_id=%s;
+            """,
+            new_request
+        )
+    else:
+        new_request = (date, user_id, chat_id, messege_id)
+        make_request(
+            """ INSERT INTO requests (date, user_id, chat_id, messege_id)
+                VALUES(%s, %s, %s, %s)
+            """,
+            new_request
+        )
 
 
 def help(message):
     """Выводим кнопки основного меню на экран."""
+    check_user(message)
+
     keyboard = types.InlineKeyboardMarkup(row_width=2)
 
     add_note = types.InlineKeyboardButton(
@@ -78,21 +126,11 @@ def help(message):
     message_id = message.message_id
     bot.delete_message(message.chat.id, message_id)
 
-    add_new_user = (
-        message.from_user.id,
-        message.from_user.first_name,
-        message.from_user.last_name
-    )
-
-    make_request(
-        'execute',
-        """REPLACE INTO users VALUES(?, ?, ?);""",
-        add_new_user
-    )
-
 
 def location(message):
     """Кнопки меню погоды в только личном чате с ботом"""
+    check_user(message)
+
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     weather_per_day = types.InlineKeyboardButton(
         text="🌈 погода сейчас",
@@ -123,15 +161,15 @@ def location(message):
 
     replace_messege_id(message.from_user.id, menu_id, chat_id)
 
-    iddate = round(time.time() * 100000)
-    geo = (iddate, message.from_user.id, lon, lat)
+    date_id = round(time.time() * 100000)
 
+    geo = (date_id, message.from_user.id, lon, lat)
     make_request(
-        'execute',
-        """INSERT INTO geolocation VALUES(?, ?, ?, ?);""",
+        """INSERT INTO geolocation (date_id, user_id, longitude, latitude)
+           VALUES(%s, %s, %s, %s);
+        """,
         geo
     )
-
     message_id = message.message_id
     bot.delete_message(message.chat.id, message_id)
 
@@ -141,11 +179,10 @@ def callback_inline(call):
     message = call.message
 
     menu_id = make_request(
-        'execute',
-        """ SELECT MAX(dateid), chatid, messegeid
+        """ SELECT date, chat_id, messege_id
             FROM requests
-            WHERE userid=? and chatid=?
-        ;""",
+            WHERE user_id=%s and chat_id=%s;
+        """,
         (call.from_user.id,  message.chat.id),
         fetch='all'
     )

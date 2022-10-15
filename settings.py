@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -5,28 +6,39 @@ from telebot import TeleBot
 
 # токен телеграмм бота, получить можно
 # https://tlgg.ru/BotFather
-TOKEN = '5395922222:AAGVENnG3cYEqiBvE4G_y5sALE7KkyaFuY8'
+TOKEN = os.getenv('TOKEN')
 
 # ID telegram семейного группового чата
-CHAT_ID = '-1001777599892'
+CHAT_ID = os.getenv('CHAT_ID')
 
 # ID на сайте предоставления прогноза погоды
 # https://home.openweathermap.org/api_keys
-OW_API_ID = '46bcbd1d671a980f039b66823a1b3e94'
+OW_API_ID = os.getenv('OW_API_ID')
 
 # ID на https://yandex.ru/dev/maps/geocoder/
-YANDEX_GEO_API = 'dfbc282b-38dd-4d50-953b-d549bd437432'
+YANDEX_GEO_API = os.getenv('YANDEX_GEO_API')
 
 # ID детей для предоставления только детских анекдотов
-ID_CHILDREN = ['2018237767']
+ID_CHILDREN = list(os.getenv('ID_CHILDREN').split())
 
 # ID admin in Telegram, куда будут приходить уведомлеия о пропуске времени
-ID_ADMIN = '225429268'
+ID_ADMIN = os.getenv('ID_ADMIN')
 
-DOMEN = 'https://my-webhook-bot.herokuapp.com'
+# домен webhook
+DOMEN = os.getenv('DOMEN')
 
-# DOMEN = 'https://afca-178-67-245-148.eu.ngrok.io'
+# подключение к postgres
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 PATH_BOT = f'{os.path.dirname(sys.argv[0])}'
 
 bot = TeleBot(TOKEN)
+
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+    filename='main.log',
+    level=logging.DEBUG
+)
+logger = logging.getLogger(__name__)
+
+logger.addHandler(logging.StreamHandler(sys.stdout))

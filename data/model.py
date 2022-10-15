@@ -1,79 +1,99 @@
-import os
+import urllib.parse as urlparse
+
 import psycopg2
+from settings import DATABASE_URL, ID_ADMIN, logger
 
-from settings import ID_ADMIN
-
-from data.methods import send_message
+from data.methods import send_error_message
 
 
 def create_connection():
     try:
-        # DATABASE_URL = f'{PATH_BOT}/db.sqlite3'
-        DATABASE_URL = os.environ['DATABASE_URL']
-        connection = psycopg2.connect(DATABASE_URL)
-        return connection
-    except psycopg2.DatabaseError as exc:
-        send_message(ID_ADMIN, f'ошибочка SQL - {exc}')
+        url = urlparse.urlparse(DATABASE_URL)
+        dbname = url.path[1:]
+        user = url.username
+        password = url.password
+        host = url.hostname
+        port = url.port
+
+        return psycopg2.connect(
+                    dbname=dbname,
+                    user=user,
+                    password=password,
+                    host=host,
+                    port=port
+        )
+    except psycopg2.Error as error:
+        send_error_message(ID_ADMIN, f'ошибка в connection SQL - {error}')
+        logger.error(error, exc_info=True)
 
 
-def make_request(request, text, variables=None, fetch=None):
+def make_request(text, variables=None, fetch=None):
     """ Функция делает запрос к БД с параметрами:
-        1 request - метод запроса,
-        2 text - тест запрос,
-        3 variables - переменные в запросе,
-        4 fetch - извлечение из БД (all, one)."""
-    conn = create_connection()
-    cur = conn.cursor()
-    result = '!', 200
-    if request == 'executescript':
-        cur.executescript(text)
-    elif request == 'execute':
+        1 text - тест запрос,
+        2 variables - переменные в запросе,
+        3 fetch - извлечение из БД (all, one)."""
+    try:
+        conn = create_connection()
+        cur = conn.cursor()
+        result = '!', 200
+
         if variables is None:
-            qwerty = cur.execute(text)
+            cur.execute(text)
         else:
-            qwerty = cur.execute(text, variables)
+            cur.execute(text, variables)
 
         if fetch == 'all':
-            result = qwerty.fetchall()
+            result = cur.fetchall()
         elif fetch == 'one':
-            result = qwerty.fetchone()
+            result = cur.fetchone()
+        conn.commit()
 
-    conn.commit()
-    conn.close()
-    return result
+        return result
+
+    except psycopg2.errors.DuplicateTable as error:
+        logger.info(error)
+    except psycopg2.Error as error:
+        send_error_message(ID_ADMIN, f'ошибка в cursor SQL - {error}')
+        logger.error(error, exc_info=True)
+        conn.rollback()
+    finally:
+        cur.close()
+        conn.close()
 
 
 make_request(
-    'executescript',
-    """CREATE TABLE IF NOT EXISTS users(
-        userid INT PRIMARY KEY,
-        fname TEXT,
-        lname TEXT
-    );
-    CREATE TABLE IF NOT EXISTS requests(
-        dateid INT PRIMARY KEY,
-        userid INT UNIQUE,
-        chatid INT,
-        messegeid INT
-    );
-    CREATE TABLE IF NOT EXISTS tasks(
-        id INT PRIMARY KEY,
-        date TEXT,
-        time TEXT,
-        type TEXT,
-        task TEXT,
-        userid INT
-    );
-    CREATE TABLE IF NOT EXISTS geolocation(
-        iddate INT PRIMARY KEY,
-        userid INT,
-        longitude TEXT,
-        latitude TEXT
-    );
-    CREATE TABLE IF NOT EXISTS reactions(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        word TEXT,
-        answer TEXT
+    """ CREATE TABLE users (
+        user_id integer PRIMARY KEY,
+        user_first text,
+        user_last text
+    );"""
+)
+make_request(
+    """ CREATE TABLE requests (
+        id serial PRIMARY KEY,
+        date bigint NOT NULL,
+        user_id integer UNIQUE NOT NULL,
+        chat_id integer NOT NULL,
+        messege_id integer NOT NULL
+    );"""
+)
+make_request(
+    """ CREATE TABLE tasks (
+        id serial PRIMARY KEY,
+        date text NOT NULL,
+        time text,
+        type text,
+        task text NOT NULL,
+        user_id integer NOT NULL
+    );"""
+)
+make_request(
+    """ CREATE TABLE geolocation (
+        id serial PRIMARY KEY,
+        date_id bigint NOT NULL,
+        user_id integer NOT NULL,
+        longitude text NOT NULL,
+        latitude text NOT NULL
     );
     """
 )
