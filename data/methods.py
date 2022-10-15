@@ -2,7 +2,7 @@ import json
 import pickle
 
 import requests
-from settings import PATH_BOT, TOKEN, logger
+from settings import TOKEN, logger, ID_ADMIN
 
 URL = (
     'https://api.telegram.org/bot'
@@ -28,17 +28,19 @@ def send_error_message(chat_id, text):
 def read_file() -> float:
     """Считываем время из файла для проверки."""
     try:
-        with open(f'{PATH_BOT}/check_time.pickle', 'rb') as fb:
+        with open('check_time.pickle', 'rb') as fb:
             return pickle.load(fb)
     except Exception as error:
         logger.error(error, exc_info=True)
+        send_error_message(ID_ADMIN, error)
         return 0
 
 
 def write_file(check_time: float) -> None:
     """Записываем текущее время в файл для проверки на следующем цикле."""
     try:
-        with open(f'{PATH_BOT}/check_time.pickle', 'wb') as fb:
+        with open('check_time.pickle', 'wb') as fb:
             pickle.dump(check_time, fb)
     except Exception as error:
         logger.error(error, exc_info=True)
+        send_error_message(ID_ADMIN, error)
