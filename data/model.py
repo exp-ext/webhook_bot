@@ -61,6 +61,10 @@ def make_request(text, variables=None, fetch=None):
         conn.close()
 
 
+def drop_table():
+    make_request("""DROP TABLE requests;""")
+
+
 make_request(
     """ CREATE TABLE users (
         user_id integer PRIMARY KEY,

@@ -183,7 +183,7 @@ def callback_inline(call):
             FROM requests
             WHERE user_id=%s and chat_id=%s;
         """,
-        (call.from_user.id,  message.chat.id),
+        (call.from_user.id,  str(message.chat.id)),
         fetch='all'
     )
 

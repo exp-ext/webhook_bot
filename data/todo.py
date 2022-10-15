@@ -187,7 +187,7 @@ def add_notes(message):
                 FROM requests
                 WHERE user_id=%s AND chat_id=%s;
             """,
-            (user_id, message.chat.id),
+            (user_id, str(message.chat.id)),
             fetch='one'
         )
         bot.delete_message(question_id[0], question_id[1])
@@ -254,7 +254,7 @@ def del_note(message):
                 FROM requests
                 WHERE user_id=%s AND chat_id=%s;
             """,
-            (message.from_user.id, message.chat.id),
+            (message.from_user.id, str(message.chat.id)),
             fetch='one'
         )
         bot.delete_message(question_id[0], question_id[1])
@@ -334,7 +334,7 @@ def show_note_on_date(message):
                 FROM requests
                 WHERE user_id=%s AND chat_id=%s;
             """,
-            (message.from_user.id, message.chat.id),
+            (message.from_user.id, str(message.chat.id)),
             fetch='one'
         )
     bot.delete_message(question_id[0], question_id[1])
