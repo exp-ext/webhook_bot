@@ -14,7 +14,6 @@ def create_connection():
         password = url.password
         host = url.hostname
         port = url.port
-
         return psycopg2.connect(
                     dbname=dbname,
                     user=user,
@@ -76,7 +75,7 @@ make_request(
     """ CREATE TABLE requests (
         id serial PRIMARY KEY,
         date bigint NOT NULL,
-        user_id integer UNIQUE NOT NULL,
+        user_id integer NOT NULL,
         chat_id text NOT NULL,
         messege_id integer NOT NULL
     );"""
