@@ -6,7 +6,7 @@ from telebot import types
 from data.geoservice import (current_weather, my_current_geoposition,
                              weather_forecast)
 from data.model import make_request
-from data.parsing import show_joke, where_to_go
+from data.parsing import show_joke, where_to_go, get_cat_image
 from data.todo import (add_notes, del_note, show_all_birthdays, show_all_notes,
                        show_note_on_date)
 
@@ -103,15 +103,20 @@ def help(message):
         "🏄 список мероприятий в СПб",
         callback_data='where_to_go'
     )
+    cats_image = types.InlineKeyboardButton(
+        "😼 картинки с котиками",
+        callback_data='get_cat_image'
+    )
 
     keyboard.add(add_note, del_note, get_all_birthdays,
                  get_note_on_date, get_all_note, get_joke)
     keyboard.add(where_to_go)
+    keyboard.add(cats_image)
 
     menu_text = (
-        "* 💡  ГЛАВНОЕ МЕНЮ  💡 *".center(28, "~")
+        "* 💡  ГЛАВНОЕ МЕНЮ  💡 *".center(26, "~")
         + "\n"
-        + f"для пользователя {message.from_user.first_name}".center(28, "~")
+        + f"для пользователя {message.from_user.first_name}".center(26, "~")
     )
 
     menu_id = bot.send_message(
@@ -253,6 +258,8 @@ def callback_inline(call):
         message.from_user.first_name = call.from_user.first_name
         message.from_user.id = call.from_user.id
         my_current_geoposition(message)
+    elif call.data == 'get_cat_image':
+        get_cat_image(message)
 
 
 def help_location(message):

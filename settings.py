@@ -30,8 +30,6 @@ DOMEN = os.getenv('DOMEN')
 # подключение к postgres
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-PATH_BOT = f'{os.path.dirname(sys.argv[0])}'
-
 bot = TeleBot(TOKEN)
 
 logging.basicConfig(

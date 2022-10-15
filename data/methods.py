@@ -2,7 +2,7 @@ import json
 import pickle
 
 import requests
-from settings import TOKEN, logger, ID_ADMIN
+from settings import TOKEN, logger
 
 URL = (
     'https://api.telegram.org/bot'

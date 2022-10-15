@@ -6,7 +6,7 @@ from random import choice
 import requests
 from bs4 import BeautifulSoup
 
-from settings import ID_CHILDREN, bot
+from settings import ID_CHILDREN, bot, logger
 
 
 def where_to_go(message):
@@ -82,3 +82,17 @@ def show_joke(message):
     """Показать анекдот."""
     id_user = message.chat.id
     bot.send_message(message.chat.id, joke_parsing(id_user))
+
+
+def get_cat_image(message):
+    try:
+        url = 'https://api.thecatapi.com/v1/images/search'
+        response = requests.get(url)
+    except Exception as error:
+        logger.error(error, exc_info=True)
+        url = 'https://api.thedogapi.com/v1/images/search'
+        response = requests.get(url)
+
+    response = response.json()
+    random_cat = response[0].get('url')
+    bot.send_photo(message.chat.id, random_cat)
