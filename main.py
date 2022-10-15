@@ -42,7 +42,6 @@ def check_note_and_send_message():
     cur_time_tup = time.mktime(
         datetime.now().replace(second=0, microsecond=0).timetuple()
     )
-
     last_time_to_check = read_file()
 
     if cur_time_tup - 60 > last_time_to_check:
@@ -55,11 +54,10 @@ def check_note_and_send_message():
             cur_time_tup
         ).strftime('%H:%M')
 
-        send_error_message(
+        bot.send_message(
             ID_ADMIN,
             f"пропуск врмени с {hour_start} до {hour_end}"
         )
-
     write_file(cur_time_tup)
 
     # поиск в базе событий для вывода в текущую минуту
@@ -89,7 +87,8 @@ def check_note_and_send_message():
     )
     send_flag = False
     text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
-
+    bot.send_message(ID_ADMIN, f"Отправил бот {time_for_warning}")
+    send_error_message(ID_ADMIN, f"Отправил error_mess {time_for_warning}")
     if time_for_warning != '07:15':
         for item in tasks:
             if date_today_str and time_for_warning in item:
