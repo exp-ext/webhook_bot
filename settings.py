@@ -22,14 +22,16 @@ YANDEX_GEO_API = os.getenv('YANDEX_GEO_API')
 ID_CHILDREN = list(os.getenv('ID_CHILDREN').split())
 
 # ID admin in Telegram, куда будут приходить уведомлеия о пропуске времени
+# и прочая информация
 ID_ADMIN = os.getenv('ID_ADMIN')
 
 # домен webhook
 DOMEN = os.getenv('DOMEN')
 
-# подключение к postgres
+# подключение к базе данных postgres
 DATABASE_URL = os.getenv('DATABASE_URL')
 
+# токен Яндекс Практикум
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 
 bot = TeleBot(TOKEN)
@@ -45,7 +47,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 def check_tokens():
-    """Checks the availability of environment variables."""
+    """Проверка доступности переменных среды.."""
     env_vars = {
         'TOKEN': TOKEN,
         'CHAT_ID': CHAT_ID,
@@ -53,7 +55,6 @@ def check_tokens():
         'ID_ADMIN': ID_ADMIN,
         'DOMEN': DOMEN,
         'DATABASE_URL': DATABASE_URL,
-        'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
     }
     for key, value in env_vars.items():
         if value is None or value == '':

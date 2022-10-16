@@ -15,7 +15,8 @@ from data.homework import main_yandex_practicum
 from data.menu import callback_inline, help, help_location, location
 from data.methods import read_file, send_error_message, write_file
 from data.model import make_request
-from settings import CHAT_ID, DOMEN, ID_ADMIN, TOKEN, bot, check_tokens, logger
+from settings import (CHAT_ID, DOMEN, ID_ADMIN, PRACTICUM_TOKEN, TOKEN, bot,
+                      check_tokens, logger)
 
 server = Flask(__name__)
 
@@ -92,7 +93,8 @@ def main_process_distributor():
     send_flag = False
     text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
 
-    if int(time_for_warning.split(':')[1]) % 10 == 0:
+    if (int(time_for_warning.split(':')[1]) % 10 == 0
+            and PRACTICUM_TOKEN):
         main_yandex_practicum()
 
     if time_for_warning != '07:15':
@@ -217,9 +219,9 @@ def start():
             drop_pending_updates=True
         )
         server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-    except Exception as exc:
-        send_error_message(ID_ADMIN, f'ошибка webhook - {exc}')
-        logger.exception(f'ошибка webhook - {exc}')
+    except Exception as error:
+        send_error_message(ID_ADMIN, f'ошибка webhook - {error}')
+        logger.error(error, exc_info=True)
 
 
 if __name__ == '__main__':

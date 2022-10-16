@@ -3,7 +3,7 @@ from typing import Tuple
 
 import requests
 
-from settings import CHAT_ID, OW_API_ID, YANDEX_GEO_API, bot
+from settings import CHAT_ID, OW_API_ID, YANDEX_GEO_API, bot, logger
 from data.model import make_request
 
 
@@ -29,8 +29,8 @@ def get_address_from_coords(coords: str) -> str:
             ["AddressDetails"]["Country"]["AddressLine"]
         )
 
-    except Exception as exc:
-        return exc
+    except Exception as error:
+        logger.error(error, exc_info=True)
 
 
 def status_weather(description_weather: str) -> str:
@@ -129,8 +129,8 @@ def current_weather(message):
 
         bot.send_message(message.chat.id, st, parse_mode='Markdown')
 
-    except Exception as exc:
-        bot.send_message(message.chat.id, f'ошибочка вышла - {exc}')
+    except Exception as error:
+        logger.error(error, exc_info=True)
 
 
 def weather_forecast(message):
@@ -217,5 +217,5 @@ def weather_forecast(message):
         text_weather += f"      ЗАКАТ     в *{sunset_time.strftime('%H:%M')}*"
         bot.send_message(message.chat.id, text_weather, parse_mode='Markdown')
 
-    except Exception as exc:
-        bot.send_message(message.chat.id, f'ошибочка вышла - {exc}')
+    except Exception as error:
+        logger.error(error, exc_info=True)

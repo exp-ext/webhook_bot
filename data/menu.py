@@ -3,10 +3,11 @@ import time
 from settings import bot, logger
 from telebot import types
 
+from data.api import get_cat_image, where_to_go
 from data.geoservice import (current_weather, my_current_geoposition,
                              weather_forecast)
 from data.model import make_request
-from data.parsing import show_joke, where_to_go, get_cat_image
+from data.parsing import show_joke
 from data.todo import (add_notes, del_note, show_all_birthdays, show_all_notes,
                        show_note_on_date)
 
@@ -99,10 +100,6 @@ def help(message):
         "🎭 анекдот",
         callback_data='joke'
     )
-    where_to_go = types.InlineKeyboardButton(
-        "🏄 список мероприятий в СПб",
-        callback_data='where_to_go'
-    )
     cats_image = types.InlineKeyboardButton(
         "😼 картинки с котиками",
         callback_data='get_cat_image'
@@ -110,7 +107,6 @@ def help(message):
 
     keyboard.add(add_note, del_note, get_all_birthdays,
                  get_note_on_date, get_all_note, get_joke)
-    keyboard.add(where_to_go)
     keyboard.add(cats_image)
 
     menu_text = (
@@ -132,8 +128,28 @@ def help(message):
     bot.delete_message(message.chat.id, message_id)
 
 
+def help_location(message):
+    """Создаём кнопку для получения геокоординат в его личном чате."""
+    keyboard = types.ReplyKeyboardMarkup(
+        row_width=1,
+        resize_keyboard=True
+    )
+    button_geo = types.KeyboardButton(
+        text="Показать меню 📋",
+        request_location=True
+    )
+    keyboard.add(button_geo)
+    bot.send_message(
+        message.chat.id,
+        'Появилась кнопка с новыми функциями.',
+        reply_markup=keyboard
+    )
+    message_id = message.message_id
+    bot.delete_message(message.chat.id, int(message_id))
+
+
 def location(message):
-    """Кнопки меню погоды в только личном чате с ботом"""
+    """Кнопки меню погоды только в личном чате с ботом"""
     check_user(message)
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -149,9 +165,15 @@ def location(message):
         text="🛰 моя позиция для группы",
         callback_data='my_position'
     )
-    keyboard.add(weather_per_day, get_weather_for_4_day, get_my_position)
+    where_to_go = types.InlineKeyboardButton(
+        "🏄 список мероприятий поблизости",
+        callback_data='where_to_go'
+    )
+    keyboard.add(
+        weather_per_day, get_weather_for_4_day, get_my_position, where_to_go
+    )
 
-    menu_text = "* 💡  МЕНЮ ПОГОДЫ  💡 *".center(28, "~")
+    menu_text = "* 💡  МЕНЮ  💡 *".center(28, "~")
 
     menu_id = bot.send_message(
         message.chat.id,
@@ -247,6 +269,7 @@ def callback_inline(call):
         )
         bot.register_next_step_handler(msg, show_note_on_date)
     elif call.data == 'where_to_go':
+        message.from_user.id = call.from_user.id
         where_to_go(message)
     elif call.data == 'weather':
         message.from_user.id = call.from_user.id
@@ -260,23 +283,3 @@ def callback_inline(call):
         my_current_geoposition(message)
     elif call.data == 'get_cat_image':
         get_cat_image(message)
-
-
-def help_location(message):
-    """Создаём кнопку для получения геокоординат в его личном чате."""
-    keyboard = types.ReplyKeyboardMarkup(
-        row_width=1,
-        resize_keyboard=True
-    )
-    button_geo = types.KeyboardButton(
-        text="☀️ получить погоду и 👣 моё местоположение",
-        request_location=True
-    )
-    keyboard.add(button_geo)
-    bot.send_message(
-        message.chat.id,
-        'появилась кнопочка погоды по Вашим координатам',
-        reply_markup=keyboard
-    )
-    message_id = message.message_id
-    bot.delete_message(message.chat.id, int(message_id))

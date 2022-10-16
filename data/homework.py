@@ -70,7 +70,6 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Checks the API response for correctness."""
-    logger.info('Получен JSON-формат')
 
     if not isinstance(response, dict) and len(response) == 0:
         rise_msg = 'Некорректный словарь.'
@@ -112,7 +111,7 @@ def parse_status(homework):
 
 
 def main_yandex_practicum():
-    """Основная логика работы бота."""
+    """Основная логика работы модуля."""
     current_timestamp = 0
     global LAST_STATUS
     try:
@@ -127,5 +126,5 @@ def main_yandex_practicum():
         LAST_STATUS = homework
 
     except Exception as error:
-        message = f'Сбой в работе программы: {error}'
+        message = f'Сбой в работе модуля Homework: {error}'
         send_message(message)
