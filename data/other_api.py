@@ -1,51 +1,31 @@
 import time
 from datetime import date as dt
 from datetime import datetime, timedelta
-from math import asin, cos, radians, sin, sqrt
 
 import requests
+from data.exceptions import BedRequestError
 from settings import bot, logger
 
-from data.geoservice import get_geo_coordinates
+from data.geoservice import get_geo_coordinates, get_distance
 
 
 def get_cat_image(message):
     try:
         url = 'https://api.thecatapi.com/v1/images/search'
-        response = requests.get(url)
+        response = requests.get(url).json()
     except Exception as error:
         logger.error(error, exc_info=True)
-        url = 'https://randomfox.ca/floof/'
-        response = requests.get(url)
 
-    response = response.json()
     random_cat = response[0].get('url')
+
     bot.send_photo(message.chat.id, random_cat)
-
-
-def haversine(lat1, lon1, lat2, lon2):
-    """
-        Вычисляет расстояние в километрах между двумя точками,
-        учитывая окружность Земли.
-        https://en.wikipedia.org/wiki/Haversine_formula
-    """
-    # convert decimal degrees to radians
-    lon1, lat1, lon2, lat2 = map(radians, (lon1, lat1, lon2, lat2))
-
-    # haversine formula
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    c = 2 * asin(sqrt(a))
-    km = 6367 * c
-    return km
 
 
 def find_closest_lat_lon(data, v):
     try:
         return min(
             data,
-            key=lambda p: haversine(p['lat'], p['lon'], v['lat'], v['lon'])
+            key=lambda p: get_distance(p['lat'], p['lon'], v['lat'], v['lon'])
         )
     except TypeError as error:
         logger.error(error, exc_info=True)
@@ -86,17 +66,37 @@ def where_to_go(message):
                 nearest_city = city['slug']
                 city_name = city['name']
 
-        resp = requests.get(
-            'https://kudago.com/public-api/v1.4/events/',
-            {
-                'actual_since': date_yesterday,
-                'actual_until': date_tomorrow,
-                'location': nearest_city,
-                'is_free': True,
-            }
+        categories = (
+            'yarmarki-razvlecheniya-yarmarki,festival,'
+            'entertainment,exhibition,holiday,kids'
         )
+        try:
+            response = requests.get(
+                'https://kudago.com/public-api/v1.4/events/',
+                {
+                    'actual_since': date_yesterday,
+                    'actual_until': date_tomorrow,
+                    'location': nearest_city,
+                    'is_free': True,
+                    'categories': categories,
+                }
+            )
+        except requests.exceptions.ConnectionError as error:
+            raise logger.error('Ошибка подключения:', error)
+        except requests.exceptions.InvalidJSONError as error:
+            raise logger.error('Произошла ошибка JSON', error)
+        except requests.exceptions.RequestException as error:
+            raise logger.error(error)
 
-        next_data = resp.json()
+        if response.status_code != 200:
+            rise_msg = (
+                'Эндпоинт kudago.com недоступен. '
+                'Код ответа API: '
+            )
+            logger.error(f'{rise_msg} {response.status_code}')
+            raise BedRequestError(rise_msg, response)
+
+        next_data = response.json()
 
         date_today = datetime.strftime(date_today_int, '%Y-%m-%d')
         text = (
@@ -105,23 +105,15 @@ def where_to_go(message):
             '(https://kudago.com/spb/festival/'
             f'?date={date_today}&hide_online=y&only_free=y)\n\n'
         )
-        # лист с рекламмой
-        excluded_list = ['197880', '198003', '187745', '187466', '187745']
 
         for item in next_data['results']:
-            if item['id'] not in excluded_list:
-                text += (
-                    f"- {item['title'].capitalize()} [>>>]"
-                    f"(https://kudago.com/spb/event/{item['slug']}/)\n"
-                )
-                text += '-------------\n'
+            text += (
+                f"- {item['title'].capitalize()} [>>>]"
+                f"(https://kudago.com/spb/event/{item['slug']}/)\n"
+            )
+            text += '-------------\n'
 
         bot.send_message(message.chat.id, text, parse_mode='Markdown')
 
     except Exception as error:
         logger.error(error, exc_info=True)
-
-
-# def data_numbers_api(date):
-#     listdate = date.split('.')
-#     url = f'http://numbersapi.com/{listdate[1]}/{listdate[0]}/date'

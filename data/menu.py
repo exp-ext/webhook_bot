@@ -3,7 +3,7 @@ import time
 from settings import bot, logger
 from telebot import types
 
-from data.api import get_cat_image, where_to_go
+from data.other_api import get_cat_image, where_to_go
 from data.geoservice import (current_weather, my_current_geoposition,
                              weather_forecast)
 from data.model import make_request

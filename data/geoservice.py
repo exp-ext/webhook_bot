@@ -1,9 +1,10 @@
 from datetime import datetime
+from math import asin, cos, radians, sin, sqrt
 from typing import Tuple
 
 import requests
-
 from settings import CHAT_ID, OW_API_ID, YANDEX_GEO_API, bot, logger
+
 from data.model import make_request
 
 
@@ -219,3 +220,21 @@ def weather_forecast(message):
 
     except Exception as error:
         logger.error(error, exc_info=True)
+
+
+def get_distance(lat1, lon1, lat2, lon2):
+    """
+        Вычисляет расстояние в километрах между двумя точками,
+        учитывая окружность Земли.
+        https://en.wikipedia.org/wiki/Haversine_formula
+    """
+    # convert decimal degrees to radians
+    lon1, lat1, lon2, lat2 = map(radians, (lon1, lat1, lon2, lat2))
+
+    # haversine formula
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    c = 2 * asin(sqrt(a))
+    km = 6367 * c
+    return km

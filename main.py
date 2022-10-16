@@ -28,8 +28,15 @@ class ScheduleProcess():
     def try_check():
         while True:
             try:
-                main_process_distributor()
-                time.sleep(60)
+                time.sleep(1)
+                cur_time = int(time.time())
+
+                if cur_time % 60 == 0:
+                    main_process_distributor()
+
+                if cur_time % 600 == 0 and PRACTICUM_TOKEN:
+                    main_yandex_practicum()
+
             except Exception as exc:
                 send_error_message(
                     ID_ADMIN, f'ошибка главного процесса - {exc}'
@@ -92,10 +99,6 @@ def main_process_distributor():
     )
     send_flag = False
     text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
-
-    if (int(time_for_warning.split(':')[1]) % 10 == 0
-            and PRACTICUM_TOKEN):
-        main_yandex_practicum()
 
     if time_for_warning != '07:15':
         for item in tasks:
