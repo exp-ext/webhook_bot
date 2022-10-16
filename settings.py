@@ -42,3 +42,25 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 logger.addHandler(logging.StreamHandler(sys.stdout))
+
+
+def check_tokens():
+    """Checks the availability of environment variables."""
+    env_vars = {
+        'TOKEN': TOKEN,
+        'CHAT_ID': CHAT_ID,
+        'OW_API_ID': OW_API_ID,
+        'ID_ADMIN': ID_ADMIN,
+        'DOMEN': DOMEN,
+        'DATABASE_URL': DATABASE_URL,
+        'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
+    }
+    for key, value in env_vars.items():
+        if value is None or value == '':
+            logger.critical(
+                'Отсутствие обязательной переменной окружения '
+                f'<{key}> или её значения, во время запуска бота!'
+            )
+            return False
+    logger.info('Проверка токенов прошла успешно.')
+    return True

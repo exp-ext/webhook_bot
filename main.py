@@ -8,37 +8,41 @@ from multiprocessing.context import Process
 
 import holidays
 import pytz
-import schedule
 import telebot
 from flask import Flask, request
 
+from data.homework import main_yandex_practicum
 from data.menu import callback_inline, help, help_location, location
 from data.methods import read_file, send_error_message, write_file
 from data.model import make_request
-from settings import CHAT_ID, DOMEN, ID_ADMIN, TOKEN, bot, logger
-from data.homework import main_yandex_practicum
-# from flask_sslify import SSLify
+from settings import CHAT_ID, DOMEN, ID_ADMIN, TOKEN, bot, check_tokens, logger
 
 server = Flask(__name__)
-# sslif = SSLify(server)
 
 APP_URL = f'{DOMEN}/{TOKEN}'
 
 
-class ScheduleMessage():
-    def try_send_schedule():
+class ScheduleProcess():
+    """Дополнительный процесс для main_process_distributor."""
+    def try_check():
         while True:
-            schedule.run_pending()
-            time.sleep(1)
+            try:
+                main_process_distributor()
+                time.sleep(60)
+            except Exception as exc:
+                send_error_message(
+                    ID_ADMIN, f'ошибка главного процесса - {exc}'
+                )
+                logger.exception(f'ошибка главного процесса - {exc}')
 
     def start_process():
-        p1 = Process(target=ScheduleMessage.try_send_schedule, args=())
+        p1 = Process(target=ScheduleProcess.try_check, args=())
         p1.start()
 
 
-def check_note_and_send_message():
+def main_process_distributor():
     """Основной модуль оповещающий о событиях в чатах."""
-    # проверка на пропуск минут в случаях отказов оборудования
+    # проверка на пропуск минут
     cur_time_tup = time.mktime(
         datetime.now().replace(second=0, microsecond=0).timetuple()
     )
@@ -199,9 +203,12 @@ def index():
         return '!', 200
 
 
-def main():
-    schedule.every(1).minutes.do(check_note_and_send_message)
-    ScheduleMessage.start_process()
+def start():
+    """Запуск бота."""
+    if check_tokens() is False:
+        raise SystemExit
+
+    ScheduleProcess.start_process()
 
     try:
         bot.remove_webhook()
@@ -216,4 +223,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    start()
