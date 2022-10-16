@@ -10,6 +10,7 @@ from data.geoservice import get_geo_coordinates, get_distance
 
 
 def get_cat_image(message):
+    """API с картинками котиков."""
     try:
         url = 'https://api.thecatapi.com/v1/images/search'
         response = requests.get(url).json()
@@ -117,3 +118,30 @@ def where_to_go(message):
 
     except Exception as error:
         logger.error(error, exc_info=True)
+
+
+def get_forismatic_quotes():
+    """Случайная цитата дня."""
+    try:
+        response = requests.get(
+            'http://api.forismatic.com/api/1.0/',
+            {
+                'method': 'getQuote',
+                'format': 'text',
+                'lang': 'ru',
+            }
+        )
+    except requests.exceptions.ConnectionError as error:
+        raise logger.error('Ошибка подключения:', error)
+    except requests.exceptions.RequestException as error:
+        raise logger.error(error)
+
+    if response.status_code != 200:
+        rise_msg = (
+            'Эндпоинт api.forismatic недоступен. '
+            'Код ответа API: '
+        )
+        logger.error(f'{rise_msg} {response.status_code}')
+        raise BedRequestError(rise_msg, response)
+
+    return response.text

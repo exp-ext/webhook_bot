@@ -17,6 +17,7 @@ from data.methods import read_file, send_error_message, write_file
 from data.model import make_request
 from settings import (CHAT_ID, DOMEN, ID_ADMIN, PRACTICUM_TOKEN, TOKEN, bot,
                       check_tokens, logger)
+from data.other_api import get_forismatic_quotes
 
 server = Flask(__name__)
 
@@ -97,6 +98,12 @@ def main_process_distributor():
         datetime.now(time_zone) + timedelta(hours=4),
         '%H:%M'
     )
+    cur_time_msk = datetime.strftime(datetime.now(time_zone), '%H:%M')
+
+    if cur_time_msk == '10:00':
+        msg = '*Цитата на злобу дня:*\n' + get_forismatic_quotes()
+        bot.send_message(CHAT_ID, msg, parse_mode='Markdown')
+
     send_flag = False
     text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
 
@@ -108,8 +115,6 @@ def main_process_distributor():
                 del_id.append(item[4])
         if send_flag:
             bot.send_message(CHAT_ID, text_note, parse_mode='Markdown')
-
-    cur_time_msk = datetime.strftime(datetime.now(time_zone), '%H:%M')
 
     if cur_time_msk == '07:15':
         send_flag_note = False
