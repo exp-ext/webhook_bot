@@ -1,4 +1,4 @@
-#!/opt/bin python3
+#!/usr/bin python3
 # -*- coding: utf-8 -*-
 import os
 import time
@@ -34,7 +34,7 @@ class ScheduleProcess():
                 cur_time = int(time.time())
 
                 if cur_time % 60 == 0:
-                    main_process_distributor()
+                    main_process_distributor(cur_time)
 
                 if cur_time % 600 == 0 and PRACTICUM_TOKEN:
                     main_yandex_practicum()
@@ -50,21 +50,16 @@ class ScheduleProcess():
         p1.start()
 
 
-def main_process_distributor():
+def main_process_distributor(cur_time_tup):
     """Основной модуль оповещающий о событиях в чатах."""
     # проверка на пропуск минут
     global LAST_TIME
-    cur_time_tup = time.mktime(
-        datetime.now().replace(second=0, microsecond=0).timetuple()
-    )
     last_time_to_check = LAST_TIME
 
     if cur_time_tup - 60 > last_time_to_check:
-
         hour_start = datetime.fromtimestamp(
             last_time_to_check
         ).strftime('%H:%M')
-
         hour_end = datetime.fromtimestamp(
             cur_time_tup
         ).strftime('%H:%M')
@@ -83,7 +78,6 @@ def main_process_distributor():
         date_today + timedelta(days=7),
         '%d.%m'
     )
-
     tasks = make_request(
         """ SELECT date, time, type, task, id
             FROM tasks
@@ -92,7 +86,6 @@ def main_process_distributor():
         (date_today_str, date_birthday, date_delta_birth),
         fetch='all'
     )
-
     del_id = []
     time_zone = pytz.timezone('Europe/Moscow')
 
@@ -105,20 +98,16 @@ def main_process_distributor():
     if cur_time_msk == '10:00':
         msg = '*Цитата на злобу дня:*\n' + get_forismatic_quotes()
         bot.send_message(CHAT_ID, msg, parse_mode='Markdown')
-
-    send_flag = False
-    text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
-
-    if time_for_warning != '07:15':
-        for item in tasks:
-            if date_today_str and time_for_warning in item:
-                text_note += f'- {item[3]}\n'
-                send_flag = True
-                del_id.append(item[4])
-        if send_flag:
-            bot.send_message(CHAT_ID, text_note, parse_mode='Markdown')
-
-    if cur_time_msk == '07:15':
+    elif cur_time_msk == '08:00':
+        ru_holidays = holidays.RU()
+        if date_today in ru_holidays:
+            hd = ru_holidays.get(date_today)
+            bot.send_message(
+                CHAT_ID,
+                f'Господа, поздравляю вас с праздником - *{hd}*',
+                parse_mode='Markdown'
+            )
+    elif cur_time_msk == '07:15':
         send_flag_note = False
         send_flag_birth = False
         send_flag_birth_ahead = False
@@ -160,13 +149,16 @@ def main_process_distributor():
                 parse_mode='Markdown'
             )
 
-        ru_holidays = holidays.RU()
-        if date_today in ru_holidays:
-            hd = ru_holidays.get(date_today)
-            bot.send_message(
-                CHAT_ID,
-                f'Господа, поздравляю вас с праздником - {hd}'
-            )
+    if time_for_warning != '07:15':
+        send_flag = False
+        text_note = '*Напоминаю, что у вас есть планы 🧾:*\n'
+        for item in tasks:
+            if date_today_str and time_for_warning in item:
+                text_note += f'- {item[3]}\n'
+                send_flag = True
+                del_id.append(item[4])
+        if send_flag:
+            bot.send_message(CHAT_ID, text_note, parse_mode='Markdown')
 
     if len(del_id) > 0:
         if len(del_id) == 1:
@@ -201,7 +193,7 @@ def handler_callback(call):
     callback_inline(call)
 
 
-@server.route('/test', methods=['GET', 'POST'])
+@server.route('/test', methods=['GET'])
 def test():
     return 'alive'
 
