@@ -1,6 +1,6 @@
 import time
 
-from settings import bot, logger
+from settings import bot, logger, ID_ADMIN
 from telebot import types
 
 from data.other_api import get_cat_image, where_to_go
@@ -37,7 +37,9 @@ def check_user(message):
             """,
             (user_id, user_first, user_last)
         )
-        logger.info(f'Создан новый юзер {user_first} {user_last}')
+        msg = f'Создан новый юзер {user_first} {user_last}'
+        logger.info(msg)
+        bot.send_message(ID_ADMIN, msg)
 
 
 def replace_message_id(user_id: int, message_id: int, chat_id: str) -> None:

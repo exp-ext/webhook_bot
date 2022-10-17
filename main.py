@@ -213,7 +213,6 @@ def start():
         raise SystemExit
 
     ScheduleProcess.start_process()
-
     try:
         bot.remove_webhook()
         bot.set_webhook(

@@ -45,7 +45,7 @@ def check_tokens():
         'DATABASE_URL': DATABASE_URL,
     }
     for key, value in env_vars.items():
-        if value is None or value == '':
+        if not value or value == '':
             logger.critical(
                 'Отсутствие обязательной переменной окружения '
                 f'<{key}> или её значения, во время запуска бота!'

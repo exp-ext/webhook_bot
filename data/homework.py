@@ -70,19 +70,19 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Checks the API response for correctness."""
-
+    logger.info('Получен JSON-формат')
+    list_homework = response['homeworks']
     if not isinstance(response, dict) and len(response) == 0:
         rise_msg = 'Некорректный словарь.'
         logger.error(rise_msg)
         raise IncorrectDataError(rise_msg)
-    elif not isinstance(response['homeworks'], list):
+    elif not isinstance(list_homework, list):
         rise_msg = 'Под ключом `homeworks` домашки приходят не в виде списка.'
         logger.error(rise_msg)
         raise IncorrectDataError(rise_msg)
-    elif len(response['homeworks']) == 0:
+    elif len(list_homework) == 0:
         return None
-
-    return response['homeworks'][0]
+    return list_homework[0]
 
 
 def parse_status(homework):
