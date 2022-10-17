@@ -22,7 +22,7 @@ from data.other_api import get_forismatic_quotes
 server = Flask(__name__)
 
 APP_URL = f'{DOMEN}/{TOKEN}'
-LAST_TIME = ''
+LAST_TIME = 0
 
 
 class ScheduleProcess():
