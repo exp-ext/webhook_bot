@@ -77,7 +77,7 @@ make_request(
         date bigint NOT NULL,
         user_id integer NOT NULL,
         chat_id text NOT NULL,
-        messege_id integer NOT NULL
+        message_id integer NOT NULL
     );"""
 )
 make_request(

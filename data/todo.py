@@ -17,7 +17,7 @@ def similarity(s1: str, s2: str) -> float:
 
 
 class Messege:
-    """Создаем объкт напоминания."""
+    """Создаем объект напоминания."""
     __slots__ = ('date', 'message', 'time', 'type_note')
 
     def __init__(self,
@@ -183,7 +183,7 @@ def add_notes(message):
                     text_send, parse_mode='Markdown'
                 )
         question_id = make_request(
-            """ SELECT chat_id, messege_id
+            """ SELECT chat_id, message_id
                 FROM requests
                 WHERE user_id=%s AND chat_id=%s;
             """,
@@ -250,7 +250,7 @@ def del_note(message):
                 )
 
         question_id = make_request(
-            """ SELECT chat_id, messege_id
+            """ SELECT chat_id, message_id
                 FROM requests
                 WHERE user_id=%s AND chat_id=%s;
             """,
@@ -268,7 +268,7 @@ def del_note(message):
 
 
 def show_note_on_date(message):
-    """Вывод записей из БД на конкретую дату."""
+    """Вывод записей из БД на конкретную дату."""
     data = getter_data_for_parsing_messege(message.text)
     date = data[0]
     date_every_year = '.'.join([date.split('.')[0], date.split('.')[1]])
@@ -330,7 +330,7 @@ def show_note_on_date(message):
                 parse_mode='Markdown'
             )
     question_id = make_request(
-            """ SELECT chat_id, messege_id
+            """ SELECT chat_id, message_id
                 FROM requests
                 WHERE user_id=%s AND chat_id=%s;
             """,

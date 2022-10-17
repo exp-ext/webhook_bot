@@ -40,7 +40,7 @@ def check_user(message):
         logger.info(f'Создан новый юзер {user_first} {user_last}')
 
 
-def replace_messege_id(user_id: int, messege_id: int, chat_id: str) -> None:
+def replace_message_id(user_id: int, message_id: int, chat_id: str) -> None:
     """Заменяем последний ID сообщения user в БД."""
     date = round(time.time() * 100000)
     check_record = make_request(
@@ -52,18 +52,18 @@ def replace_messege_id(user_id: int, messege_id: int, chat_id: str) -> None:
             fetch='one'
     )
     if check_record:
-        new_request = (date, user_id, chat_id, messege_id, user_id)
+        new_request = (date, user_id, chat_id, message_id, user_id)
         make_request(
             """ UPDATE requests
-                SET date=%s, user_id=%s, chat_id=%s, messege_id=%s
+                SET date=%s, user_id=%s, chat_id=%s, message_id=%s
                 WHERE user_id=%s;
             """,
             new_request
         )
     else:
-        new_request = (date, user_id, chat_id, messege_id)
+        new_request = (date, user_id, chat_id, message_id)
         make_request(
-            """ INSERT INTO requests (date, user_id, chat_id, messege_id)
+            """ INSERT INTO requests (date, user_id, chat_id, message_id)
                 VALUES(%s, %s, %s, %s)
             """,
             new_request
@@ -122,7 +122,7 @@ def help(message):
         parse_mode='Markdown'
     ).message_id
 
-    replace_messege_id(message.from_user.id, menu_id, str(message.chat.id))
+    replace_message_id(message.from_user.id, menu_id, str(message.chat.id))
 
     message_id = message.message_id
     bot.delete_message(message.chat.id, message_id)
@@ -186,7 +186,7 @@ def location(message):
     lat = message.location.latitude
     lon = message.location.longitude
 
-    replace_messege_id(message.from_user.id, menu_id, str(chat_id))
+    replace_message_id(message.from_user.id, menu_id, str(chat_id))
 
     date_id = round(time.time() * 100000)
 
@@ -206,7 +206,7 @@ def callback_inline(call):
     message = call.message
 
     menu_id = make_request(
-        """ SELECT date, chat_id, messege_id
+        """ SELECT date, chat_id, message_id
             FROM requests
             WHERE user_id=%s and chat_id=%s;
         """,
@@ -234,7 +234,7 @@ def callback_inline(call):
             req_text,
             parse_mode='Markdown'
         )
-        replace_messege_id(
+        replace_message_id(
             call.from_user.id, msg.message_id, str(message.chat.id)
         )
 
@@ -249,7 +249,7 @@ def callback_inline(call):
             req_text,
             parse_mode='Markdown'
         )
-        replace_messege_id(
+        replace_message_id(
             call.from_user.id, msg.message_id, str(message.chat.id)
         )
 
@@ -264,7 +264,7 @@ def callback_inline(call):
             req_text,
             parse_mode='Markdown'
             )
-        replace_messege_id(
+        replace_message_id(
             call.from_user.id, msg.message_id, str(message.chat.id)
         )
         bot.register_next_step_handler(msg, show_note_on_date)

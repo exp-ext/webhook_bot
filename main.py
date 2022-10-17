@@ -66,7 +66,7 @@ def main_process_distributor(cur_time_tup):
 
         bot.send_message(
             ID_ADMIN,
-            f"пропуск врмени с {hour_start} до {hour_end}"
+            f"пропуск времени с {hour_start} до {hour_end}"
         )
     LAST_TIME = cur_time_tup
 
