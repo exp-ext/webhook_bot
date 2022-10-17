@@ -5,7 +5,7 @@
 <tr>
 <td>
 
-<img src="https://github.com/exp-ext/GitProjects/blob/main/pre.png" width="600">
+<img src="https://github.com/exp-ext/GitProjects/blob/main/pre.png" width="500">
 
 </td>
 <td>
