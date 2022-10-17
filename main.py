@@ -13,7 +13,7 @@ from flask import Flask, request
 
 from data.homework import main_yandex_practicum
 from data.menu import callback_inline, help, help_location, location
-from data.methods import read_file, send_error_message, write_file
+from data.err_mess import send_error_message
 from data.model import make_request
 from settings import (CHAT_ID, DOMEN, ID_ADMIN, PRACTICUM_TOKEN, TOKEN, bot,
                       check_tokens, logger)
@@ -22,6 +22,7 @@ from data.other_api import get_forismatic_quotes
 server = Flask(__name__)
 
 APP_URL = f'{DOMEN}/{TOKEN}'
+LAST_TIME = ''
 
 
 class ScheduleProcess():
@@ -52,10 +53,11 @@ class ScheduleProcess():
 def main_process_distributor():
     """Основной модуль оповещающий о событиях в чатах."""
     # проверка на пропуск минут
+    global LAST_TIME
     cur_time_tup = time.mktime(
         datetime.now().replace(second=0, microsecond=0).timetuple()
     )
-    last_time_to_check = read_file()
+    last_time_to_check = LAST_TIME
 
     if cur_time_tup - 60 > last_time_to_check:
 
@@ -71,7 +73,7 @@ def main_process_distributor():
             ID_ADMIN,
             f"пропуск врмени с {hour_start} до {hour_end}"
         )
-    write_file(cur_time_tup)
+    LAST_TIME = cur_time_tup
 
     # поиск в базе событий для вывода в текущую минуту
     date_today = dt.today()

@@ -3,7 +3,7 @@ import urllib.parse as urlparse
 import psycopg2
 from settings import DATABASE_URL, ID_ADMIN, logger
 
-from data.methods import send_error_message
+from data.err_mess import send_error_message
 
 
 def create_connection():
