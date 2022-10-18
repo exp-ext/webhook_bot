@@ -1,15 +1,13 @@
-<h1 align="center"> ♬👻 𝔱𝔬Đ𝓸  𝕓ｏŦ ＤlⓎᗩ Ｇⓡ𝕦𝓅ρ𝐨ｖ𝕠𝐆Ｏ ᑕ𝐇𝕒тᵃ 😳♩</h1>
+<h1 align="center"> ♬👻 ToDo ѣѳϯ đʌᴙ ґⱀƴππѳʙѳґѳ ᑕ𝐇𝕒тᵃ 😳♩</h1>
 
 <p align="center">
 <a href="#skills">⊂ກ০⊂০bዘ০⊂τu |</a>
-
 <a href="#tokens">τ০kℯዘӸ u ID |</a>
-
 <a href="#starts">∂ℯກᏁ০ú u ℨᏘກɣ⊂k</a>
 </p>
 
 <p align="center">
-<img src="https://github.com/exp-ext/GitProjects/blob/main/pre.png" width="600">
+<img src="https://github.com/exp-ext/GitProjects/blob/main/pre.png" width="700">
 </p>
 
 <section id="skills">
