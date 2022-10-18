@@ -61,7 +61,7 @@ def make_request(text, variables=None, fetch=None):
 
 
 def drop_table():
-    make_request("""DROP TABLE requests;""")
+    make_request("""DROP TABLE users;""")
 
 
 make_request(

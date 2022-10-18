@@ -1,27 +1,16 @@
-# ♬👻 𝔱𝔬Đ𝓸  𝕓ｏŦ ＤlⓎᗩ Ｇⓡ𝕦𝓅ρ𝐨ｖ𝕠𝐆Ｏ ᑕ𝐇𝕒тᵃ 😳♩
+<h1 align="center"> ♬👻 𝔱𝔬Đ𝓸  𝕓ｏŦ ＤlⓎᗩ Ｇⓡ𝕦𝓅ρ𝐨ｖ𝕠𝐆Ｏ ᑕ𝐇𝕒тᵃ 😳♩</h1>
 
-***
-<table>
-<tr>
-<td>
+<p align="center">
+<a href="#skills">⊂ກ০⊂০bዘ০⊂τu |</a>
 
-<img src="https://github.com/exp-ext/GitProjects/blob/main/pre.png" width="500">
-
-</td>
-<td>
-<h3>
-
-<a href="#skills">⊂ກ০⊂০bዘ০⊂τu</a>
-
-<a href="#tokens">τ০kℯዘӸ u ID</a>
+<a href="#tokens">τ০kℯዘӸ u ID |</a>
 
 <a href="#starts">∂ℯກᏁ০ú u ℨᏘກɣ⊂k</a>
+</p>
 
-</h3>
-</td>
-</tr>
-</table>
-
+<p align="center">
+<img src="https://github.com/exp-ext/GitProjects/blob/main/pre.png" width="600">
+</p>
 
 <section id="skills">
     <h2> Οϰ γϻεετ </h2>
