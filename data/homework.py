@@ -7,9 +7,9 @@ from data.exceptions import (BedRequestError, IncorrectDataError,
 
 load_dotenv()
 
-LAST_STATUS = {}
+LAST_STATUSES = {}
 
-RETRY_TIME = 60 * 10
+RETRY_TIME = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
@@ -70,19 +70,28 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Checks the API response for correctness."""
+    global LAST_STATUSES
     logger.info('Получен JSON-формат')
-    list_homework = response['homeworks']
-    if not isinstance(response, dict) and len(response) == 0:
+    list_homeworks = response['homeworks']
+    last_list_homeworks = LAST_STATUSES
+    if not isinstance(response, dict) and not response:
         rise_msg = 'Некорректный словарь.'
         logger.error(rise_msg)
         raise IncorrectDataError(rise_msg)
-    elif not isinstance(list_homework, list):
+    elif not isinstance(list_homeworks, list):
         rise_msg = 'Под ключом `homeworks` домашки приходят не в виде списка.'
         logger.error(rise_msg)
         raise IncorrectDataError(rise_msg)
-    elif len(list_homework) == 0:
+    elif not list_homeworks:
         return None
-    return list_homework[0]
+    elif not last_list_homeworks:
+        LAST_STATUSES = list_homeworks
+        return list_homeworks[0]
+
+    for homework in list_homeworks:
+        if homework not in last_list_homeworks:
+            LAST_STATUSES = list_homeworks
+        return homework
 
 
 def parse_status(homework):
@@ -113,17 +122,14 @@ def parse_status(homework):
 def main_yandex_practicum():
     """Основная логика работы модуля."""
     current_timestamp = 0
-    global LAST_STATUS
     try:
         response = get_api_answer(current_timestamp)
         current_timestamp = response['current_date']
         homework = check_response(response)
 
-        if homework and homework != LAST_STATUS:
+        if homework:
             message = parse_status(homework)
             send_message(message)
-
-        LAST_STATUS = homework
 
     except Exception as error:
         message = f'Сбой в работе модуля Homework: {error}'
