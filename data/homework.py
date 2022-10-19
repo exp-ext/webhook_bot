@@ -91,7 +91,7 @@ def check_response(response):
     for homework in list_homeworks:
         if homework not in last_list_homeworks:
             LAST_STATUSES = list_homeworks
-        return homework
+            return homework
 
 
 def parse_status(homework):
