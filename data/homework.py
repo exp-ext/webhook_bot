@@ -9,7 +9,6 @@ load_dotenv()
 
 LAST_STATUSES = {}
 
-RETRY_TIME = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
@@ -28,13 +27,18 @@ def send_message(message):
             text=message
         )
         logger.info(f'Сообщение "{message}" успешно отправлено.')
+
+        if response.status_code != 200:
+            rise_msg = (
+                'При отправке сообщения возникла ошибка. '
+                'Код ошибки: '
+            )
+            logger.error(f'{rise_msg}{response}.')
+            raise BedRequestError(rise_msg, response)
+
     except Exception as error:
-        rise_msg = (
-            'При отправке сообщения возникла ошибка. '
-            'Код ошибки: '
-        )
-        logger.error(f'{rise_msg}{response}. Дополнительно: {error}')
-        raise BedRequestError(rise_msg, response)
+        logger.error(f'Ошибка при отправке сообщения -> {error}')
+        raise KeyError(error)
 
 
 def get_api_answer(current_timestamp):
@@ -73,7 +77,6 @@ def check_response(response):
     global LAST_STATUSES
     logger.info('Получен JSON-формат')
     list_homeworks = response['homeworks']
-    last_list_homeworks = LAST_STATUSES
     if not isinstance(response, dict) and not response:
         rise_msg = 'Некорректный словарь.'
         logger.error(rise_msg)
@@ -84,12 +87,12 @@ def check_response(response):
         raise IncorrectDataError(rise_msg)
     elif not list_homeworks:
         return None
-    elif not last_list_homeworks:
+    elif not LAST_STATUSES:
         LAST_STATUSES = list_homeworks
-        return list_homeworks[0]
+        return None
 
     for homework in list_homeworks:
-        if homework not in last_list_homeworks:
+        if homework not in LAST_STATUSES:
             LAST_STATUSES = list_homeworks
             return homework
 

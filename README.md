@@ -1,4 +1,4 @@
-<h1 align="center"> ♬👻 ToDo ѣѳϯ đʌᴙ ґⱀƴππѳʙѳґѳ ᑕ𝐇𝕒тᵃ 😳♩</h1>
+<h1 align="center"> ♬👻 ToDo бᴏᴛ дᴧя ᴦᴩуᴨᴨᴏʙᴏᴦᴏ CHATa 😳♩</h1>
 
 <p align="center">
 <a href="#skills">⊂ກ০⊂০bዘ০⊂τu |</a>
