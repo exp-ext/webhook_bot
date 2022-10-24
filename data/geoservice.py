@@ -77,7 +77,7 @@ def my_current_geoposition(message):
         f"{message.from_user.first_name} находится:\n"
         f"[{get_address_from_coords(geo)}]"
         "(https://yandex.ru/maps/?whatshere[point]="
-        f"{geo}&whatshere[zoom]=17)\n"
+        f"{geo}&whatshere[zoom]=20)\n"
     )
 
     bot.send_message(CHAT_ID, send_text, parse_mode='Markdown')

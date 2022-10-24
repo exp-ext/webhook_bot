@@ -127,7 +127,7 @@ def main_yandex_practicum():
     current_timestamp = 0
     try:
         response = get_api_answer(current_timestamp)
-        current_timestamp = response['current_date']
+
         homework = check_response(response)
 
         if homework:
