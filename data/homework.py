@@ -124,9 +124,9 @@ def parse_status(homework):
 
 def main_yandex_practicum():
     """Основная логика работы модуля."""
-    current_timestamp = 0
+    timestamp = 0
     try:
-        response = get_api_answer(current_timestamp)
+        response = get_api_answer(timestamp)
 
         homework = check_response(response)
 
