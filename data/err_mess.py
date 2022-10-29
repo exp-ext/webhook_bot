@@ -2,8 +2,7 @@ import requests
 from settings import TOKEN, logger
 
 URL = (
-    'https://api.telegram.org/bot'
-    + TOKEN
+    f'https://api.telegram.org/bot{TOKEN}'
 )
 
 

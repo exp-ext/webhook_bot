@@ -209,9 +209,8 @@ def index():
 
 def start():
     """Запуск бота."""
-    if check_tokens() is False:
-        raise SystemExit
 
+    check_tokens()
     ScheduleProcess.start_process()
     try:
         bot.remove_webhook()

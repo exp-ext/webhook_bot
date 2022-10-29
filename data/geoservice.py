@@ -8,7 +8,7 @@ from settings import CHAT_ID, OW_API_ID, YANDEX_GEO_API, bot, logger
 from data.model import make_request
 
 
-def get_address_from_coords(coords: str) -> str:
+def get_address_from_coords(coords: str):
     """Опрос api geocode-maps.yandex для получения адреса местонахождения."""
     params = {
         "apikey": YANDEX_GEO_API,

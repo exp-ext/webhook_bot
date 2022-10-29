@@ -22,19 +22,8 @@ HOMEWORK_STATUSES = {
 def send_message(message):
     """Sends a message to Telegram chat."""
     try:
-        response = bot.send_message(
-            chat_id=ID_ADMIN,
-            text=message
-        )
+        bot.send_message(ID_ADMIN, message)
         logger.info(f'Сообщение "{message}" успешно отправлено.')
-
-        if response.status_code != 200:
-            rise_msg = (
-                'При отправке сообщения возникла ошибка. '
-                'Код ошибки: '
-            )
-            logger.error(f'{rise_msg}{response}.')
-            raise BedRequestError(rise_msg, response)
 
     except Exception as error:
         logger.error(f'Ошибка при отправке сообщения -> {error}')
@@ -51,11 +40,14 @@ def get_api_answer(current_timestamp):
             params=params
         )
     except requests.exceptions.ConnectionError as error:
-        raise logger.error('Ошибка подключения:', error)
+        logger.error('Ошибка подключения:', error)
+        raise KeyError(error)
     except requests.exceptions.InvalidJSONError as error:
-        raise logger.error('Произошла ошибка JSON', error)
+        logger.error('Произошла ошибка JSON', error)
+        raise KeyError(error)
     except requests.exceptions.RequestException as error:
-        raise logger.error(error)
+        logger.error(error)
+        raise KeyError(error)
 
     if response.status_code != 200:
         rise_msg = (
