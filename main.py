@@ -4,7 +4,7 @@ import os
 import time
 from datetime import date as dt
 from datetime import datetime, timedelta
-from multiprocessing.context import Process
+from multiprocessing import Process
 
 import holidays
 import pytz
@@ -34,7 +34,10 @@ class ScheduleProcess():
                 cur_time = int(time.time())
 
                 if cur_time % 60 == 0:
-                    main_process_distributor(cur_time)
+                    p1 = Process(
+                        target=main_process_distributor, args=(cur_time,)
+                    )
+                    p1.start()
 
                 if cur_time % 600 == 0 and PRACTICUM_TOKEN:
                     main_yandex_practicum()
@@ -209,8 +212,9 @@ def index():
 
 def start():
     """Запуск бота."""
+    if check_tokens() is False:
+        raise SystemExit
 
-    check_tokens()
     ScheduleProcess.start_process()
     try:
         bot.remove_webhook()

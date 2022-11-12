@@ -23,6 +23,8 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 
+bot = TeleBot(TOKEN)
+
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
     filename='logs.log',
@@ -48,8 +50,6 @@ def check_tokens():
                 'Отсутствие обязательной переменной окружения '
                 f'<{key}> или её значения, во время запуска бота!'
             )
-            raise SystemExit
+            return False
     logger.info('Проверка токенов прошла успешно.')
-
-
-bot = TeleBot(TOKEN)
+    return True
