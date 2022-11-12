@@ -34,10 +34,7 @@ class ScheduleProcess():
                 cur_time = int(time.time())
 
                 if cur_time % 60 == 0:
-                    p1 = Process(
-                        target=main_process_distributor, args=(cur_time,)
-                    )
-                    p1.start()
+                    main_process_distributor(cur_time)
 
                 if cur_time % 600 == 0 and PRACTICUM_TOKEN:
                     main_yandex_practicum()
