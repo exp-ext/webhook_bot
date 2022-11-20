@@ -1,6 +1,7 @@
 #!/usr/bin python3
 # -*- coding: utf-8 -*-
 import os
+from threading import Thread
 import time
 from datetime import date as dt
 from datetime import datetime, timedelta
@@ -34,10 +35,20 @@ class ScheduleProcess():
                 cur_time = int(time.time())
 
                 if cur_time % 60 == 0:
-                    main_process_distributor(cur_time)
+                    t1 = Thread(
+                        group=None,
+                        target=main_process_distributor,
+                        args=(cur_time,)
+                    )
+                    t1.start()
 
                 if cur_time % 600 == 0 and PRACTICUM_TOKEN:
-                    main_yandex_practicum()
+                    t1 = Thread(
+                        group=None,
+                        target=main_yandex_practicum,
+                        args=()
+                    )
+                    t1.start()
 
             except Exception as exc:
                 send_error_message(
