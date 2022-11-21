@@ -29,12 +29,13 @@ LAST_TIME = 0
 class ScheduleProcess():
     """Дополнительный процесс для main_process_distributor."""
     def try_check():
-        while True:
-            try:
-                time.sleep(1)
-                cur_time = int(time.time())
+        start_time = time.sleep(1)
+        if start_time % 60 == 0:
+            while True:
+                try:
+                    time.sleep(60)
+                    cur_time = int(time.time())
 
-                if cur_time % 60 == 0:
                     t1 = Thread(
                         group=None,
                         target=main_process_distributor,
@@ -42,19 +43,19 @@ class ScheduleProcess():
                     )
                     t1.start()
 
-                if cur_time % 600 == 0 and PRACTICUM_TOKEN:
-                    t1 = Thread(
-                        group=None,
-                        target=main_yandex_practicum,
-                        args=()
-                    )
-                    t1.start()
+                    if cur_time % 600 == 0 and PRACTICUM_TOKEN:
+                        t1 = Thread(
+                            group=None,
+                            target=main_yandex_practicum,
+                            args=()
+                        )
+                        t1.start()
 
-            except Exception as exc:
-                send_error_message(
-                    ID_ADMIN, f'ошибка главного процесса - {exc}'
-                )
-                logger.exception(f'ошибка главного процесса - {exc}')
+                except Exception as exc:
+                    send_error_message(
+                        ID_ADMIN, f'ошибка главного процесса - {exc}'
+                    )
+                    logger.exception(f'ошибка главного процесса - {exc}')
 
     def start_process():
         p1 = Process(target=ScheduleProcess.try_check, args=())
