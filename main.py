@@ -66,14 +66,9 @@ def main_process_distributor(cur_time_tup):
     global LAST_TIME
     last_time_to_check = LAST_TIME
 
-    if cur_time_tup.tm_min == last_time_to_check.tm_min + 1:
-        hour_start = datetime.fromtimestamp(
-            last_time_to_check
-        ).strftime('%H:%M')
-        hour_end = datetime.fromtimestamp(
-            cur_time_tup
-        ).strftime('%H:%M')
-
+    if cur_time_tup.tm_min != last_time_to_check.tm_min + 1:
+        hour_start = time.strftime("%H:%M", last_time_to_check)
+        hour_end = time.strftime("%H:%M", cur_time_tup)
         bot.send_message(
             ID_ADMIN,
             f"пропуск времени с {hour_start} до {hour_end}"
