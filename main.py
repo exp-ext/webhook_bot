@@ -1,29 +1,28 @@
 #!/usr/bin python3
 # -*- coding: utf-8 -*-
 import os
-from threading import Thread
 import time
-from datetime import date as dt
 from datetime import datetime, timedelta
 from multiprocessing import Process
+from threading import Thread
 
 import holidays
 import pytz
 import telebot
 from flask import Flask, request
 
+from data.err_mess import send_error_message
 from data.homework import main_yandex_practicum
 from data.menu import callback_inline, help, help_location, location
-from data.err_mess import send_error_message
 from data.model import make_request
+from data.other_api import get_forismatic_quotes
 from settings import (CHAT_ID, DOMEN, ID_ADMIN, PRACTICUM_TOKEN, TOKEN, bot,
                       check_tokens, logger)
-from data.other_api import get_forismatic_quotes
 
 server = Flask(__name__)
 
 APP_URL = f'{DOMEN}/{TOKEN}'
-LAST_TIME = time.localtime(1)
+LAST_DATETIME: datetime = datetime.utcnow().replace(second=0, microsecond=0)
 
 
 class ScheduleProcess():
@@ -32,16 +31,17 @@ class ScheduleProcess():
         while True:
             try:
                 time.sleep(60)
-                local_time = time.localtime()
+                this_datetime = datetime.utcnow().replace(
+                                                    second=0, microsecond=0)
 
                 t1 = Thread(
                     group=None,
                     target=main_process_distributor,
-                    args=(local_time,)
+                    args=(this_datetime,)
                 )
                 t1.start()
 
-                if local_time.tm_min % 10 == 0 and PRACTICUM_TOKEN:
+                if this_datetime.minute % 10 == 0 and PRACTICUM_TOKEN:
                     t1 = Thread(
                         group=None,
                         target=main_yandex_practicum,
@@ -60,27 +60,27 @@ class ScheduleProcess():
         p1.start()
 
 
-def main_process_distributor(cur_time):
+def main_process_distributor(this_datetime: datetime):
     """Основной модуль оповещающий о событиях в чатах."""
     # проверка на пропуск минут
-    global LAST_TIME
-    last_time_to_check = LAST_TIME
+    global LAST_DATETIME
+    last_datetime = LAST_DATETIME
 
-    if cur_time.tm_min != last_time_to_check.tm_min + 1:
-        times = (last_time_to_check, cur_time)
-        times_str = tuple(time.strftime("%H:%M", x) for x in times)
+    if this_datetime != last_datetime + timedelta(minutes=1):
+        dt_tup = (last_datetime, this_datetime)
+        times_str = tuple(x.strftime("%H:%M") for x in dt_tup)
+
         bot.send_message(
             ID_ADMIN,
             f"пропуск времени с {times_str[0]} до {times_str[1]}"
         )
-    LAST_TIME = cur_time
+    LAST_DATETIME = this_datetime
 
     # поиск в базе событий для вывода в текущую минуту
-    date_today = dt.today()
-    date_today_str = datetime.strftime(date_today, "%d.%m.%Y")
-    date_birthday = datetime.strftime(date_today, "%d.%m")
+    date_today_str = datetime.strftime(last_datetime, "%d.%m.%Y")
+    date_birthday = datetime.strftime(last_datetime, "%d.%m")
     date_delta_birth = datetime.strftime(
-        date_today + timedelta(days=7),
+        last_datetime + timedelta(days=7),
         '%d.%m'
     )
     tasks = make_request(
@@ -105,8 +105,8 @@ def main_process_distributor(cur_time):
         bot.send_message(CHAT_ID, msg, parse_mode='Markdown')
     elif cur_time_msk == '08:00':
         ru_holidays = holidays.RU()
-        if date_today in ru_holidays:
-            hd = ru_holidays.get(date_today)
+        if last_datetime in ru_holidays:
+            hd = ru_holidays.get(last_datetime)
             bot.send_message(
                 CHAT_ID,
                 f'Господа, поздравляю вас с праздником - *{hd}*',
