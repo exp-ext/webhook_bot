@@ -32,16 +32,16 @@ class ScheduleProcess():
         while True:
             try:
                 time.sleep(60)
-                cur_time = int(time.time())
+                local_time = time.localtime()
 
                 t1 = Thread(
                     group=None,
                     target=main_process_distributor,
-                    args=(cur_time,)
+                    args=(local_time,)
                 )
                 t1.start()
 
-                if cur_time % 600 == 0 and PRACTICUM_TOKEN:
+                if local_time.tm_min % 10 == 0 and PRACTICUM_TOKEN:
                     t1 = Thread(
                         group=None,
                         target=main_yandex_practicum,
@@ -66,7 +66,7 @@ def main_process_distributor(cur_time_tup):
     global LAST_TIME
     last_time_to_check = LAST_TIME
 
-    if cur_time_tup - 60 > last_time_to_check:
+    if cur_time_tup.tm_min == last_time_to_check.tm_min + 1:
         hour_start = datetime.fromtimestamp(
             last_time_to_check
         ).strftime('%H:%M')
