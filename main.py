@@ -23,7 +23,7 @@ from data.other_api import get_forismatic_quotes
 server = Flask(__name__)
 
 APP_URL = f'{DOMEN}/{TOKEN}'
-LAST_TIME = time.localtime()
+LAST_TIME = time.localtime(1)
 
 
 class ScheduleProcess():
@@ -60,25 +60,25 @@ class ScheduleProcess():
         p1.start()
 
 
-def main_process_distributor(cur_time_tup):
+def main_process_distributor(cur_time):
     """Основной модуль оповещающий о событиях в чатах."""
     # проверка на пропуск минут
     global LAST_TIME
     last_time_to_check = LAST_TIME
 
-    if cur_time_tup.tm_min != last_time_to_check.tm_min + 1:
-        hour_start = time.strftime("%H:%M", last_time_to_check)
-        hour_end = time.strftime("%H:%M", cur_time_tup)
+    if cur_time.tm_min != last_time_to_check.tm_min + 1:
+        times = (last_time_to_check, cur_time)
+        times_str = tuple(time.strftime("%H:%M", x) for x in times)
         bot.send_message(
             ID_ADMIN,
-            f"пропуск времени с {hour_start} до {hour_end}"
+            f"пропуск времени с {times_str[0]} до {times_str[1]}"
         )
-    LAST_TIME = cur_time_tup
+    LAST_TIME = cur_time
 
     # поиск в базе событий для вывода в текущую минуту
     date_today = dt.today()
-    date_today_str = datetime.strftime(date_today, '%d.%m.%Y')
-    date_birthday = datetime.strftime(date_today, '%d.%m')
+    date_today_str = datetime.strftime(date_today, "%d.%m.%Y")
+    date_birthday = datetime.strftime(date_today, "%d.%m")
     date_delta_birth = datetime.strftime(
         date_today + timedelta(days=7),
         '%d.%m'
@@ -98,7 +98,7 @@ def main_process_distributor(cur_time_tup):
         datetime.now(time_zone) + timedelta(hours=4),
         '%H:%M'
     )
-    cur_time_msk = datetime.strftime(datetime.now(time_zone), '%H:%M')
+    cur_time_msk = datetime.strftime(datetime.now(time_zone), "%H:%M")
 
     if cur_time_msk == '10:00':
         msg = '*Цитата на злобу дня:*\n' + get_forismatic_quotes()
